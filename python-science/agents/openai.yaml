@@ -1,0 +1,4 @@
+interface:
+  display_name: "Python Science"
+  short_description: "Build deployable Python data-science features"
+  default_prompt: "Use $python-science to turn this customer data-science request into a tested Python feature with prompts, logs, results, docs, and a how-to notebook."
