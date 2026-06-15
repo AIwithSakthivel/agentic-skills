@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Skills — AIwithSakthivel</title>
+  <meta name="description" content="Live demo of Claude Code custom skills: frontend-skill and python-science by AIwithSakthivel.">
+  <style>
+    :root {
+      --sidebar-bg: #1c1917;
+      --sidebar-hover: #292524;
+      --sidebar-active: #312e2b;
+      --sidebar-text: #e7e5e4;
+      --sidebar-muted: #78716c;
+      --sidebar-border: #2c2926;
+      --main-bg: #fafaf9;
+      --chat-bg: #ffffff;
+      --accent: #da6f4b;
+      --accent-hover: #c05c38;
+      --accent-glow: rgba(218,111,75,0.15);
+      --accent-light: #fef4ef;
+      --user-bg: #f4f2f0;
+      --user-border: #e4e1de;
+      --text-primary: #1c1917;
+      --text-secondary: #57534e;
+      --text-muted: #a8a29e;
+      --border: #e7e5e4;
+      --code-bg: #1c1917;
+      --inline-code-bg: #f4f2f0;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+      --radius: 10px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--main-bg);
+      color: var(--text-primary);
+    }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar {
+      width: 268px;
+      min-width: 268px;
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--sidebar-border);
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--sidebar-border);
+      flex-shrink: 0;
+    }
+
+    .logo-mark {
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(135deg, var(--accent) 0%, #b84c28 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 800;
+      color: white;
+      letter-spacing: -1px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(218,111,75,0.4);
+    }
+
+    .brand-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--sidebar-text);
+      letter-spacing: -0.2px;
+      line-height: 1.2;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--sidebar-muted);
+      font-weight: 400;
+    }
+
+    .sidebar-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 8px;
+    }
+
+    .section-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+      color: var(--sidebar-muted);
+      padding: 6px 10px 4px;
+      margin-top: 4px;
+    }
+
+    .skill-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.14s ease;
+      margin-bottom: 2px;
+      position: relative;
+    }
+
+    .skill-item:hover { background: var(--sidebar-hover); }
+    .skill-item.active { background: var(--sidebar-active); }
+
+    .skill-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 60%;
+      background: var(--accent);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .skill-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .icon-frontend { background: #1a3558; }
+    .icon-science  { background: #0f3a28; }
+
+    .skill-meta { flex: 1; min-width: 0; }
+
+    .skill-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--sidebar-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: "SF Mono", "Cascadia Code", Consolas, monospace;
+    }
+
+    .skill-desc {
+      font-size: 11.5px;
+      color: var(--sidebar-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 1px;
+    }
+
+    .skill-arrow {
+      font-size: 10px;
+      color: var(--sidebar-muted);
+      opacity: 0;
+      transition: opacity 0.14s;
+    }
+
+    .skill-item:hover .skill-arrow,
+    .skill-item.active .skill-arrow { opacity: 1; }
+
+    .add-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--sidebar-muted);
+      font-size: 13px;
+      border: 1.5px dashed var(--sidebar-border);
+      margin: 4px 0;
+      transition: all 0.14s ease;
+    }
+
+    .add-btn:hover {
+      background: var(--sidebar-hover);
+      color: var(--sidebar-text);
+      border-color: #3c3835;
+    }
+
+    .divider { height: 1px; background: var(--sidebar-border); margin: 10px 4px; }
+
+    .how-to-use-box {
+      background: var(--sidebar-hover);
+      border: 1px solid var(--sidebar-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin: 0 4px;
+    }
+
+    .how-to-use-box h4 {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--sidebar-text);
+      margin-bottom: 7px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .how-to-use-box p {
+      font-size: 11.5px;
+      color: var(--sidebar-muted);
+      line-height: 1.55;
+      margin-bottom: 5px;
+    }
+
+    .kbd {
+      display: inline-block;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-family: "SF Mono", Consolas, monospace;
+      font-size: 11px;
+      color: var(--accent);
+    }
+
+    .sidebar-footer {
+      padding: 12px;
+      border-top: 1px solid var(--sidebar-border);
+      flex-shrink: 0;
+    }
+
+    .github-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--sidebar-muted);
+      font-size: 12px;
+      transition: all 0.14s ease;
+    }
+
+    .github-link:hover {
+      background: var(--sidebar-hover);
+      color: var(--sidebar-text);
+    }
+
+    /* ─── MAIN ─── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .topbar {
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .topbar-skill-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-light);
+      border: 1px solid rgba(218,111,75,0.2);
+      border-radius: 100px;
+      padding: 4px 10px 4px 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      white-space: nowrap;
+      font-family: "SF Mono", Consolas, monospace;
+    }
+
+    .topbar-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .model-chip {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      background: #f4f2f0;
+      padding: 4px 10px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .tab-btn {
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: white;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.14s;
+      font-weight: 500;
+    }
+
+    .tab-btn:hover { background: var(--user-bg); }
+    .tab-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* ─── EMPTY STATE ─── */
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    .empty-glyph {
+      width: 60px;
+      height: 60px;
+      border-radius: 16px;
+      background: var(--accent-light);
+      border: 1px solid rgba(218,111,75,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 18px;
+    }
+
+    .empty-state h2 {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      letter-spacing: -0.3px;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      max-width: 340px;
+      line-height: 1.65;
+      margin-bottom: 24px;
+    }
+
+    .pill-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .pill {
+      padding: 9px 18px;
+      border-radius: 100px;
+      border: 1.5px solid var(--border);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.14s ease;
+      background: white;
+    }
+
+    .pill:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-light);
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+
+    /* ─── CHAT ─── */
+    .chat-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .chat-scroll::-webkit-scrollbar { width: 5px; }
+    .chat-scroll::-webkit-scrollbar-track { background: transparent; }
+    .chat-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .msg {
+      display: flex;
+      gap: 12px;
+      animation: msgIn 0.22s cubic-bezier(.22,.61,.36,1) both;
+    }
+
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg.user { flex-direction: row-reverse; }
+
+    .av {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .av.av-a { background: linear-gradient(135deg, var(--accent), #b84c28); color: white; }
+    .av.av-u { background: #e4e1de; color: var(--text-secondary); }
+
+    .msg-body { max-width: 82%; }
+    .msg.user .msg-body { max-width: 68%; }
+
+    .bubble {
+      display: inline-block;
+      padding: 11px 15px;
+      border-radius: var(--radius);
+      font-size: 13.5px;
+      line-height: 1.65;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .msg.user .bubble {
+      background: var(--user-bg);
+      border: 1px solid var(--user-border);
+      border-bottom-right-radius: 3px;
+    }
+
+    .msg.assistant .bubble {
+      background: white;
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 3px;
+      width: 100%;
+    }
+
+    .msg-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 5px;
+      padding: 0 2px;
+    }
+
+    .msg.user .msg-meta { text-align: right; }
+
+    /* ─── RICH RESPONSE ─── */
+    .rt { font-size: 13.5px; line-height: 1.7; color: var(--text-primary); }
+    .rt p  { margin-bottom: 9px; }
+    .rt h3 { font-size: 13px; font-weight: 700; color: var(--text-primary); margin: 14px 0 7px; }
+    .rt ul, .rt ol { padding-left: 18px; margin-bottom: 9px; }
+    .rt li { margin-bottom: 3px; }
+
+    .skill-active-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--accent-light);
+      border: 1px solid rgba(218,111,75,0.18);
+      border-radius: 100px;
+      padding: 3px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .file-tree {
+      background: #f7f6f5;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-family: "SF Mono", "Cascadia Code", Consolas, monospace;
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.85;
+      margin: 8px 0;
+      overflow-x: auto;
+    }
+
+    .ft-dir  { color: #3b82f6; font-weight: 600; }
+    .ft-file { color: var(--text-secondary); }
+    .ft-indent { padding-left: 16px; display: block; }
+
+    .steps { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 8px 0; }
+
+    .step {
+      display: flex;
+      gap: 12px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+    }
+
+    .step:last-child { border-bottom: none; }
+
+    .step-n {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      font-size: 10.5px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border-radius: 8px;
+      padding: 13px 15px;
+      overflow-x: auto;
+      margin: 8px 0;
+      border: 1px solid #2c2926;
+    }
+
+    pre code {
+      font-family: "SF Mono", "Cascadia Code", Consolas, monospace;
+      font-size: 12px;
+      color: #d4d0cb;
+      line-height: 1.6;
+    }
+
+    .ic {
+      background: var(--inline-code-bg);
+      border: 1px solid #ddd9d6;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-family: "SF Mono", Consolas, monospace;
+      font-size: 12px;
+      color: #b84c28;
+    }
+
+    .check { color: #22c55e; margin-right: 3px; }
+
+    /* ─── TYPING ─── */
+    .typing-dots {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+      padding: 4px 2px;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      animation: bounce 1.2s ease-in-out infinite;
+    }
+
+    .dot:nth-child(2) { animation-delay: .2s; }
+    .dot:nth-child(3) { animation-delay: .4s; }
+
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-5px); }
+    }
+
+    /* ─── INPUT BAR ─── */
+    .inputbar {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      background: white;
+      flex-shrink: 0;
+    }
+
+    .input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 9px 12px;
+      background: var(--main-bg);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .input-wrap:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .skill-tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: var(--accent-light);
+      color: var(--accent);
+      border: 1px solid rgba(218,111,75,0.2);
+      border-radius: 100px;
+      padding: 2px 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      font-family: "SF Mono", Consolas, monospace;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .input-field {
+      flex: 1;
+      border: none;
+      background: none;
+      outline: none;
+      font-size: 13.5px;
+      color: var(--text-primary);
+      font-family: inherit;
+      min-width: 0;
+    }
+
+    .input-field::placeholder { color: var(--text-muted); }
+
+    .send-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      background: var(--accent);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.14s;
+      flex-shrink: 0;
+    }
+
+    .send-btn:hover { background: var(--accent-hover); }
+
+    /* ─── SKILL DETAIL PANEL ─── */
+    .panel-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 100;
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-end;
+      padding: 0;
+      animation: fadeOverlay 0.2s ease;
+    }
+
+    @keyframes fadeOverlay { from { opacity: 0; } to { opacity: 1; } }
+
+    .panel {
+      width: 420px;
+      max-width: 100vw;
+      height: 100vh;
+      background: white;
+      box-shadow: -8px 0 32px rgba(0,0,0,0.15);
+      overflow-y: auto;
+      animation: slidePanel 0.24s cubic-bezier(.22,.61,.36,1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    @keyframes slidePanel {
+      from { transform: translateX(40px); opacity: 0; }
+      to   { transform: translateX(0);    opacity: 1; }
+    }
+
+    .panel-header {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 1;
+    }
+
+    .panel-title-wrap { display: flex; align-items: center; gap: 10px; }
+
+    .panel-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: "SF Mono", Consolas, monospace;
+      letter-spacing: -0.3px;
+    }
+
+    .panel-sub {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .close-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: white;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: all 0.14s;
+      flex-shrink: 0;
+    }
+
+    .close-btn:hover { background: var(--user-bg); color: var(--text-primary); }
+
+    .panel-body { padding: 18px 20px; flex: 1; }
+
+    .panel-section { margin-bottom: 20px; }
+
+    .panel-section h4 {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .panel-section p {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .tag {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      background: var(--user-bg);
+      font-weight: 500;
+    }
+
+    .invoke-box {
+      background: var(--code-bg);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-family: "SF Mono", Consolas, monospace;
+      font-size: 12.5px;
+      color: #d4d0cb;
+      line-height: 1.65;
+    }
+
+    .invoke-comment { color: #6c6762; }
+
+    .hidden { display: none !important; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 700px) {
+      .sidebar { width: 220px; min-width: 220px; }
+      .chat-scroll { padding: 14px; }
+    }
+
+    @media (max-width: 520px) {
+      .sidebar { display: none; }
+      .panel { width: 100vw; }
+    }
+
+    /* syntax colors */
+    .kw  { color: #f97316; }
+    .fn  { color: #60a5fa; }
+    .str { color: #a3e635; }
+    .cm  { color: #6c6762; }
+    .nb  { color: #e2e8f0; }
+  </style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-mark">C</div>
+    <div>
+      <div class="brand-text">Claude Code Skills</div>
+      <div class="brand-sub">AIwithSakthivel</div>
+    </div>
+  </div>
+
+  <div class="sidebar-scroll">
+    <div class="section-label">Skills</div>
+
+    <div class="skill-item" id="sb-frontend" onclick="selectSkill('frontend')">
+      <div class="skill-icon icon-frontend">⚡</div>
+      <div class="skill-meta">
+        <div class="skill-name">frontend-skill</div>
+        <div class="skill-desc">UI, React, accessibility</div>
+      </div>
+      <span class="skill-arrow">›</span>
+    </div>
+
+    <div class="skill-item" id="sb-science" onclick="selectSkill('science')">
+      <div class="skill-icon icon-science">🔬</div>
+      <div class="skill-meta">
+        <div class="skill-name">python-science</div>
+        <div class="skill-desc">Data science features</div>
+      </div>
+      <span class="skill-arrow">›</span>
+    </div>
+
+    <div class="add-btn">
+      <span style="font-size:17px;line-height:1">+</span>
+      <span>Add skill</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-label">Reference</div>
+
+    <div class="how-to-use-box">
+      <h4>💡 Invoke a skill</h4>
+      <p>Use <span class="kbd">$skill-name</span> anywhere in your prompt:</p>
+      <p style="margin-top:6px;"><span class="kbd">$frontend-skill</span> Build a responsive dashboard</p>
+      <p style="margin-top:4px;"><span class="kbd">$python-science</span> Deploy this ML script</p>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <a class="github-link" href="https://github.com/AIwithSakthivel/claude-code-skills" target="_blank">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.33c-2.22.48-2.69-1.07-2.69-1.07-.36-.93-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.83 1.23.83.71 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.67 7.67 0 0 1 8 4.07a7.67 7.67 0 0 1 2 .27c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.19c0 .21.15.46.55.38A8 8 0 0 0 8 0z"/>
+      </svg>
+      View on GitHub
+    </a>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div id="tb-badge" class="topbar-skill-badge hidden">
+        <span id="tb-icon"></span>
+        <span id="tb-name"></span>
+      </div>
+      <span class="topbar-title" id="tb-title">Claude Code Skills — Demo</span>
+    </div>
+    <div class="topbar-right">
+      <button class="tab-btn" id="btn-detail" onclick="openPanel()" style="display:none">View skill ↗</button>
+      <span class="model-chip">claude-sonnet-4-6</span>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div id="empty-view" class="empty-state">
+    <div class="empty-glyph">✦</div>
+    <h2>Pick a skill to see it in action</h2>
+    <p>Click a skill in the sidebar to watch Claude handle a real-world engineering request using that skill.</p>
+    <div class="pill-row">
+      <div class="pill" onclick="selectSkill('frontend')">⚡ frontend-skill</div>
+      <div class="pill" onclick="selectSkill('science')">🔬 python-science</div>
+    </div>
+  </div>
+
+  <!-- Chat view -->
+  <div id="chat-view" class="chat-scroll hidden"></div>
+
+  <!-- Input bar -->
+  <div class="inputbar">
+    <div class="input-wrap">
+      <span id="chip-wrap"></span>
+      <input class="input-field" id="inp" type="text"
+        placeholder="Select a skill from the sidebar…" readonly>
+      <button class="send-btn" title="Send">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+          <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</main>
+
+<!-- ═══ SKILL DETAIL PANEL ═══ -->
+<div id="overlay" class="panel-overlay hidden" onclick="closePanel(event)">
+  <div class="panel" id="panel" onclick="event.stopPropagation()">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title-wrap">
+          <span id="panel-icon" class="skill-icon" style="width:32px;height:32px;border-radius:8px;font-size:15px;"></span>
+          <span class="panel-title" id="panel-name"></span>
+        </div>
+        <div class="panel-sub" id="panel-sub"></div>
+      </div>
+      <button class="close-btn" onclick="closePanel()">×</button>
+    </div>
+    <div class="panel-body" id="panel-body"></div>
+  </div>
+</div>
+
+<script>
+const SKILLS = {
+  frontend: {
+    label: 'frontend-skill',
+    icon: '⚡',
+    iconClass: 'icon-frontend',
+    tagline: 'Frontend development specialist — React, Vue, Angular, accessibility, performance',
+    description: 'Guides modern frontend implementation with maintainable structure, accessibility, performance, and predictable behavior. Handles responsive UI, component architecture, API wiring, and frontend testing.',
+    tags: ['React', 'Vue', 'Angular', 'TypeScript', 'CSS', 'Accessibility', 'Performance', 'Testing'],
+    invoke: '$frontend-skill',
+    userMsg: 'Build a responsive analytics dashboard with KPI cards, a sortable data table, and a line chart — vanilla JS, no libraries.',
+    response: buildFrontendResponse(),
+    panelContent: buildFrontendPanel(),
+  },
+  science: {
+    label: 'python-science',
+    icon: '🔬',
+    iconClass: 'icon-science',
+    tagline: 'Python data-science feature builder — from scripts to SCM-ready modules',
+    description: 'Turns scripts, notebooks, and LLM workflows into deployable Python feature packages with src/, tests/, prompt_templates/, logs/, results/, and a how-to notebook.',
+    tags: ['Python', 'Data Science', 'LLM', 'Feature Packaging', 'Notebooks', 'Testing', 'Logging'],
+    invoke: '$python-science',
+    userMsg: 'Turn this customer churn prediction notebook into a deployable feature package with tests, prompts, and a usage notebook.',
+    response: buildScienceResponse(),
+    panelContent: buildSciencePanel(),
+  }
+};
+
+let current = null;
+let seq = null;
+
+function selectSkill(id) {
+  if (seq) { seq.forEach(clearTimeout); seq = []; }
+  current = id;
+  const sk = SKILLS[id];
+
+  // Sidebar active state
+  document.querySelectorAll('.skill-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('sb-' + id)?.classList.add('active');
+
+  // Topbar
+  const badge = document.getElementById('tb-badge');
+  badge.classList.remove('hidden');
+  document.getElementById('tb-icon').textContent = sk.icon + ' ';
+  document.getElementById('tb-name').textContent = sk.invoke;
+  document.getElementById('tb-title').textContent = sk.label + ' — Demo';
+
+  const detailBtn = document.getElementById('btn-detail');
+  detailBtn.style.display = 'inline-flex';
+
+  // Toggle views
+  document.getElementById('empty-view').classList.add('hidden');
+  const chat = document.getElementById('chat-view');
+  chat.classList.remove('hidden');
+  chat.innerHTML = '';
+
+  // Input chip
+  document.getElementById('chip-wrap').innerHTML =
+    `<span class="skill-tag-chip">${sk.invoke}</span>&nbsp;`;
+  document.getElementById('inp').placeholder = 'Ask this skill anything…';
+
+  // Animate messages
+  seq = [];
+  seq.push(setTimeout(() => addUser(sk.userMsg), 220));
+  seq.push(setTimeout(() => addTyping(), 700));
+  seq.push(setTimeout(() => { removeTyping(); addAssistant(sk.response); }, 2400));
+}
+
+function addUser(text) {
+  const chat = document.getElementById('chat-view');
+  const el = document.createElement('div');
+  el.className = 'msg user';
+  el.innerHTML = `
+    <div class="av av-u">S</div>
+    <div class="msg-body">
+      <div class="bubble">${esc(text)}</div>
+      <div class="msg-meta">just now</div>
+    </div>`;
+  chat.appendChild(el);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function addTyping() {
+  const chat = document.getElementById('chat-view');
+  const el = document.createElement('div');
+  el.className = 'msg assistant'; el.id = 'typing';
+  el.innerHTML = `
+    <div class="av av-a">C</div>
+    <div class="msg-body">
+      <div class="bubble">
+        <div class="typing-dots">
+          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+      </div>
+    </div>`;
+  chat.appendChild(el);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removeTyping() {
+  document.getElementById('typing')?.remove();
+}
+
+function addAssistant(html) {
+  const chat = document.getElementById('chat-view');
+  const el = document.createElement('div');
+  el.className = 'msg assistant';
+  el.innerHTML = `
+    <div class="av av-a">C</div>
+    <div class="msg-body" style="max-width:88%">
+      <div class="bubble">${html}</div>
+      <div class="msg-meta">claude-sonnet-4-6 · just now</div>
+    </div>`;
+  chat.appendChild(el);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function openPanel() {
+  if (!current) return;
+  const sk = SKILLS[current];
+  document.getElementById('panel-icon').className = `skill-icon ${sk.iconClass}`;
+  document.getElementById('panel-icon').textContent = sk.icon;
+  document.getElementById('panel-name').textContent = sk.invoke;
+  document.getElementById('panel-sub').textContent = sk.tagline;
+  document.getElementById('panel-body').innerHTML = sk.panelContent;
+  document.getElementById('overlay').classList.remove('hidden');
+}
+
+function closePanel(e) {
+  if (!e || e.target === document.getElementById('overlay')) {
+    document.getElementById('overlay').classList.add('hidden');
+  }
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ── Response content builders ── */
+function buildFrontendResponse() {
+  return `<div class="rt">
+    <div class="skill-active-badge">⚡ frontend-skill active</div>
+    <p>I'll build this as a clean, accessible dashboard. Here's my implementation plan:</p>
+    <h3>📁 File structure</h3>
+    <div class="file-tree">
+      <span class="ft-dir">dashboard/</span>
+      <span class="ft-indent"><span class="ft-dir">components/</span></span>
+      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">KPICards.js</span></span>
+      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">DataTable.js</span></span>
+      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">LineChart.js</span></span>
+      <span class="ft-indent"><span class="ft-file">app.js</span></span>
+      <span class="ft-indent"><span class="ft-file">styles.css</span></span>
+      <span class="ft-indent"><span class="ft-file">index.html</span></span>
+    </div>
+    <h3>⚙️ Key decisions</h3>
+    <div class="steps">
+      <div class="step"><div class="step-n">1</div><div><strong>KPI cards</strong> — CSS Grid <span class="ic">repeat(auto-fit, minmax(180px,1fr))</span>, color-coded delta badges (▲▼) with semantic roles</div></div>
+      <div class="step"><div class="step-n">2</div><div><strong>DataTable sort</strong> — single <span class="ic">{ col, dir }</span> state object, <span class="ic">aria-sort</span> updated on each header for screen readers</div></div>
+      <div class="step"><div class="step-n">3</div><div><strong>LineChart</strong> — SVG path with <span class="ic">ResizeObserver</span> for fluid redraws, no canvas flicker; <span class="ic">role="img"</span> + hidden data table for a11y</div></div>
+    </div>
+    <h3>✅ Accessibility & performance</h3>
+    <ul>
+      <li><span class="check">✓</span> Keyboard-navigable table with visible focus ring</li>
+      <li><span class="check">✓</span> <span class="ic">aria-sort</span> on sortable column headers</li>
+      <li><span class="check">✓</span> Chart has visually-hidden data summary table</li>
+      <li><span class="check">✓</span> CSS custom properties for easy re-theming</li>
+      <li><span class="check">✓</span> No layout shift on sort — fixed column widths</li>
+    </ul>
+    <pre><code><span class="cm">// DataTable.js — sort handler</span>
+<span class="kw">function</span> <span class="fn">sortBy</span>(col) {
+  <span class="kw">const</span> dir = state.sortCol === col
+    ? (state.sortDir === <span class="str">'asc'</span> ? <span class="str">'desc'</span> : <span class="str">'asc'</span>)
+    : <span class="str">'asc'</span>;
+  state.sortCol = col;
+  state.sortDir = dir;
+  <span class="fn">renderTable</span>();
+
+  <span class="cm">// Sync aria-sort on all th elements</span>
+  document.<span class="fn">querySelectorAll</span>(<span class="str">'th[data-col]'</span>).<span class="fn">forEach</span>(th => {
+    th.<span class="fn">setAttribute</span>(<span class="str">'aria-sort'</span>,
+      th.dataset.col === col ? dir + <span class="str">'ending'</span> : <span class="str">'none'</span>
+    );
+  });
+}</code></pre>
+  </div>`;
+}
+
+function buildScienceResponse() {
+  return `<div class="rt">
+    <div class="skill-active-badge">🔬 python-science active</div>
+    <p>Converting your notebook into a production-ready feature package. Here's the scaffold and the module responsibilities:</p>
+    <h3>📁 Feature structure</h3>
+    <div class="file-tree">
+      <span class="ft-dir">feature/churn_prediction/</span>
+      <span class="ft-indent"><span class="ft-file">README.md</span></span>
+      <span class="ft-indent"><span class="ft-dir">src/</span></span>
+      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">config.py</span></span>
+      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">models.py</span></span>
+      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">pipeline.py</span></span>
+      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">prompt_loader.py</span></span>
+      <span class="ft-indent"><span class="ft-dir">prompt_templates/</span></span>
+      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">churn_analysis.txt</span></span>
+      <span class="ft-indent"><span class="ft-dir">tests/</span></span>
+      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">test_pipeline.py</span></span>
+      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">test_prompt_loader.py</span></span>
+      <span class="ft-indent"><span class="ft-dir">logs/</span> &nbsp;<span class="ft-dir">results/</span></span>
+      <span class="ft-indent"><span class="ft-file">how_to_use_churn_prediction.ipynb</span></span>
+    </div>
+    <h3>🔧 Module responsibilities</h3>
+    <div class="steps">
+      <div class="step"><div class="step-n">1</div><div><strong>config.py</strong> — all paths, model name, threshold — explicit, no magic strings inside the pipeline</div></div>
+      <div class="step"><div class="step-n">2</div><div><strong>pipeline.py</strong> — orchestrates load → preprocess → predict → write, logging stage counts at each boundary</div></div>
+      <div class="step"><div class="step-n">3</div><div><strong>prompt_templates/</strong> — LLM prompts never live inline in Python; loaded via <span class="ic">prompt_loader.py</span></div></div>
+      <div class="step"><div class="step-n">4</div><div><strong>tests/</strong> — unit-tests on prompt loading and path resolution; mocked LLM for integration path</div></div>
+    </div>
+    <h3>📋 Logged on every run</h3>
+    <ul>
+      <li><span class="check">✓</span> Run start / end timestamps + duration</li>
+      <li><span class="check">✓</span> Input artifact path + row count</li>
+      <li><span class="check">✓</span> Model name + prediction threshold used</li>
+      <li><span class="check">✓</span> Output path + churn rate summary</li>
+      <li><span class="check">✓</span> Warnings, retries, and failures</li>
+    </ul>
+    <pre><code><span class="cm"># pipeline.py</span>
+<span class="kw">class</span> <span class="fn">ChurnPipeline</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, config: Config):
+        self.config = config
+        self.log = logging.<span class="fn">getLogger</span>(__name__)
+
+    <span class="kw">def</span> <span class="fn">run</span>(self, input_path: Path) -> Path:
+        self.log.<span class="fn">info</span>(<span class="str">"start | input=%s"</span>, input_path)
+        df       = self.<span class="fn">_load</span>(input_path)
+        features = self.<span class="fn">_preprocess</span>(df)
+        preds    = self.<span class="fn">_predict</span>(features)
+        out      = self.<span class="fn">_write</span>(preds)
+        self.log.<span class="fn">info</span>(<span class="str">"end | rows=%d | out=%s"</span>, <span class="fn">len</span>(df), out)
+        <span class="kw">return</span> out</code></pre>
+  </div>`;
+}
+
+function buildFrontendPanel() {
+  return `
+    <div class="panel-section">
+      <h4>Description</h4>
+      <p>A frontend development specialist. Guides modern web implementation with maintainable structure, accessibility, performance, and predictable behavior. Works with React, Vue, Angular, and vanilla JS/TS.</p>
+    </div>
+    <div class="panel-section">
+      <h4>Capabilities</h4>
+      <div class="tag-list">
+        <span class="tag">React / Vue / Angular</span>
+        <span class="tag">TypeScript</span>
+        <span class="tag">Responsive CSS</span>
+        <span class="tag">ARIA / Accessibility</span>
+        <span class="tag">Performance</span>
+        <span class="tag">Component testing</span>
+        <span class="tag">Design systems</span>
+        <span class="tag">SVG / Canvas</span>
+      </div>
+    </div>
+    <div class="panel-section">
+      <h4>Invoke</h4>
+      <div class="invoke-box">
+        <span class="invoke-comment"># In any Claude Code prompt:</span><br>
+        $frontend-skill Build a sortable data table with<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;accessible keyboard nav<br><br>
+        $frontend-skill Fix the mobile layout on the<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ProfilePage component
+      </div>
+    </div>
+    <div class="panel-section">
+      <h4>Typical requests</h4>
+      <ul style="font-size:13.5px;color:var(--text-secondary);padding-left:18px;line-height:1.7">
+        <li>Build a new page, modal, form, table, or dashboard</li>
+        <li>Fix responsive issues across breakpoints</li>
+        <li>Improve accessibility and pass audit checks</li>
+        <li>Diagnose React/Vue rendering or state sync bugs</li>
+        <li>Set up component tests and CI-safe frontend checks</li>
+      </ul>
+    </div>`;
+}
+
+function buildSciencePanel() {
+  return `
+    <div class="panel-section">
+      <h4>Description</h4>
+      <p>Build deployable Python data-science features for customer use cases. Turns scripts, notebooks, evaluation flows, and LLM/data workflows into SCM-ready modules with feature folders, src, tests, logs, results, prompt templates, and how-to notebooks.</p>
+    </div>
+    <div class="panel-section">
+      <h4>Capabilities</h4>
+      <div class="tag-list">
+        <span class="tag">Feature packaging</span>
+        <span class="tag">LLM pipelines</span>
+        <span class="tag">Prompt management</span>
+        <span class="tag">Logging & tracing</span>
+        <span class="tag">Unit testing</span>
+        <span class="tag">Jupyter notebooks</span>
+        <span class="tag">Data pipelines</span>
+        <span class="tag">ML deployment</span>
+      </div>
+    </div>
+    <div class="panel-section">
+      <h4>Default layout</h4>
+      <div class="invoke-box" style="line-height:1.9">
+        feature/&lt;name&gt;/<br>
+        &nbsp;&nbsp;README.md<br>
+        &nbsp;&nbsp;src/ &nbsp;&nbsp;<span class="invoke-comment"># reusable modules</span><br>
+        &nbsp;&nbsp;tests/<br>
+        &nbsp;&nbsp;prompt_templates/<br>
+        &nbsp;&nbsp;logs/ &nbsp;&nbsp;results/ &nbsp;&nbsp;data/<br>
+        &nbsp;&nbsp;how_to_use_&lt;name&gt;.ipynb
+      </div>
+    </div>
+    <div class="panel-section">
+      <h4>Invoke</h4>
+      <div class="invoke-box">
+        <span class="invoke-comment"># In any Claude Code prompt:</span><br>
+        $python-science Turn this churn script into<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a deployable feature<br><br>
+        $python-science Build an LLM eval pipeline<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with prompt templates
+      </div>
+    </div>
+    <div class="panel-section">
+      <h4>Typical requests</h4>
+      <ul style="font-size:13.5px;color:var(--text-secondary);padding-left:18px;line-height:1.7">
+        <li>Turn a script or notebook into a deployable Python feature</li>
+        <li>Build a customer use-case module with tests, prompts, and docs</li>
+        <li>Refactor an evaluation or provider workflow into a modular package</li>
+        <li>Add logging, results artifacts, and a usage notebook</li>
+      </ul>
+    </div>`;
+}
+</script>
+</body>
+</html>
