@@ -1,52 +1,52 @@
-# Claude Code Skills
+# Agentic Skills
 
-> Custom skills for [Claude Code](https://claude.ai/code) that turn the CLI into a domain-aware engineering assistant. Each skill is a `SKILL.md` file that shapes how Claude approaches a category of work — choose your specialty and invoke it with `$skill-name`.
+> Plug-and-play skill definitions that turn any AI coding assistant into a domain-aware engineering specialist. Each skill is a `SKILL.md` file — drop it into your assistant's skills directory, invoke it with `$skill-name`, and your assistant adopts that skill's operating rules, architecture patterns, and quality checklists.
 
-**[▶ Live Demo](https://aiwithsakthivel.github.io/claude-code-skills/)** &nbsp;|&nbsp; **[AIwithSakthivel](https://github.com/AIwithSakthivel)**
+**[▶ Live Demo](https://aiwithsakthivel.github.io/agentic-skills/)** &nbsp;|&nbsp; **[AIwithSakthivel](https://github.com/AIwithSakthivel)** &nbsp;|&nbsp; **[HuggingFace Space](https://huggingface.co/spaces/AIwithSakthivel/agentic-skills)**
 
 ---
 
-## Skills in this repo
+## Skills
 
-| Skill | Description | Invoke |
+| Skill | What it does | Invoke |
 |-------|-------------|--------|
-| [frontend-skill](./frontend-skill/SKILL.md) | Frontend development specialist — React, Vue, Angular, a11y, performance, responsive UI | `$frontend-skill` |
-| [python-science](./python-science/SKILL.md) | Python data-science feature builder — scripts/notebooks → SCM-ready modules with tests, prompts, logs | `$python-science` |
+| [frontend-skill](./frontend-skill/SKILL.md) | Frontend specialist — React, Vue, Angular, accessibility, responsive UI, performance, component testing | `$frontend-skill` |
+| [python-science](./python-science/SKILL.md) | Data-science feature builder — turns scripts/notebooks into SCM-ready packages with tests, prompts, logs, and usage notebooks | `$python-science` |
 
 ---
 
-## What is a Claude Code Skill?
+## What is a skill?
 
-A skill is a `SKILL.md` file placed in your Claude Code skills directory. When you prefix a prompt with `$skill-name`, Claude loads the skill's context — its operating rules, architecture patterns, and quality checklist — before generating a response.
+A skill is a `SKILL.md` file that defines how your AI assistant should approach a domain. When you prefix a prompt with `$skill-name`, the assistant loads the skill's context — its operating rules, architecture patterns, and quality checklist — before generating a response.
 
 ```
-your-prompt: $frontend-skill Build a responsive data table with accessible sorting
+$frontend-skill Build a responsive data table with accessible sorting
 ```
 
-Claude then responds as a focused frontend specialist, applying the skill's accessibility checklist, performance guidelines, and testing expectations automatically.
+The assistant responds as a focused frontend specialist, automatically applying the accessibility checklist, performance guidelines, and testing expectations from that skill.
+
+Works with any AI coding assistant that supports skill/context files (Codex, and others).
 
 ---
 
 ## Quick start
 
-### 1. Clone this repo
+### 1. Clone
 
 ```bash
-git clone https://github.com/AIwithSakthivel/claude-code-skills.git
+git clone https://github.com/AIwithSakthivel/agentic-skills.git
 ```
 
-### 2. Copy skills into Claude Code
+### 2. Copy skills into your assistant's skills directory
 
 ```bash
-# Default skills directory for Claude Code
-cp -r claude-code-skills/frontend-skill ~/.claude/skills/
-cp -r claude-code-skills/python-science  ~/.claude/skills/
+cp -r agentic-skills/frontend-skill ~/.your-assistant/skills/
+cp -r agentic-skills/python-science  ~/.your-assistant/skills/
 ```
 
 ### 3. Invoke in any prompt
 
 ```bash
-# In your terminal with Claude Code running:
 $frontend-skill Build a modal dialog with focus trap and keyboard dismiss
 $python-science  Turn this evaluation script into a deployable feature with tests
 ```
@@ -57,12 +57,13 @@ $python-science  Turn this evaluation script into a deployable feature with test
 
 ### `frontend-skill`
 
-Guides modern frontend implementation. Covers:
+Guides modern frontend implementation with maintainable structure, predictable behavior, accessibility, and performance.
 
-- Component-driven architecture (React / Vue / Angular / vanilla)
+**Covers:**
+- Component-driven architecture (React / Vue / Angular / vanilla JS)
 - Responsive layouts and CSS design tokens
-- Accessibility — keyboard nav, ARIA, focus management, contrast
-- Performance — bundle splitting, render optimization, image sizing
+- Accessibility — keyboard nav, ARIA, focus management, color contrast
+- Performance — code splitting, render optimisation, image sizing
 - Testing — unit, integration, E2E, accessibility assertions
 
 **Invoke:** `$frontend-skill <your request>`
@@ -71,13 +72,14 @@ Guides modern frontend implementation. Covers:
 
 ### `python-science`
 
-Turns scripts and notebooks into production-ready Python feature packages. Covers:
+Turns scripts and notebooks into production-ready Python feature packages with full traceability.
 
+**Covers:**
 - SCM-ready feature layout: `src/`, `tests/`, `prompt_templates/`, `logs/`, `results/`
 - Modular Python — `config.py`, `models.py`, `pipeline.py`, `prompt_loader.py`
-- LLM-backed feature structure with prompt management
+- LLM-backed feature structure with external prompt management
 - Logging baseline: run timestamps, artifact paths, row counts, model usage
-- How-to notebooks for onboarding and validation
+- Onboarding notebooks (`how_to_use_<feature>.ipynb`)
 
 **Invoke:** `$python-science <your request>`
 
@@ -85,12 +87,9 @@ Turns scripts and notebooks into production-ready Python feature packages. Cover
 
 ## Demo UI
 
-The [live demo](https://aiwithsakthivel.github.io/claude-code-skills/) is a static single-page app (`index.html`) styled to match the Claude web interface. It shows each skill handling a realistic engineering request with a typing-animation response.
-
-To run locally:
+The [live demo](https://aiwithsakthivel.github.io/agentic-skills/) is a static single-page app (`index.html`) that shows each skill handling a realistic engineering request with an animated AI response. No build step — just open in a browser.
 
 ```bash
-# No build step needed — just open in a browser
 open index.html
 ```
 
@@ -98,18 +97,18 @@ open index.html
 
 ## HuggingFace
 
-The demo UI is also hosted as a [HuggingFace Space](https://huggingface.co/spaces/AIwithSakthivel/claude-code-skills) (static HTML Space). The SKILL.md files are Claude Code-specific context files; they are not model weights or inference APIs — but the demo shows their output in an interactive format.
+Also available as a [HuggingFace Space](https://huggingface.co/spaces/AIwithSakthivel/agentic-skills) (static HTML). The `SKILL.md` files are context definitions, not model weights — but the interactive demo shows their output in a familiar interface.
 
 ---
 
 ## Repo structure
 
 ```
-claude-code-skills/
+agentic-skills/
 ├── index.html                    ← Live demo UI (GitHub Pages)
 ├── README.md
 ├── frontend-skill/
-│   ├── SKILL.md                  ← Skill definition
+│   ├── SKILL.md
 │   └── agents/openai.yaml
 └── python-science/
     ├── SKILL.md
@@ -125,8 +124,8 @@ claude-code-skills/
 
 ## License
 
-MIT — use these skills in your own Claude Code setup freely.
+MIT — use, fork, and extend freely.
 
 ---
 
-*Built by [AIwithSakthivel](https://github.com/AIwithSakthivel) · Powered by [Claude Code](https://claude.ai/code)*
+*Built by [AIwithSakthivel](https://github.com/AIwithSakthivel)*
