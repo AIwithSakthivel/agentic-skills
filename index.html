@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agentic Skills — AIwithSakthivel</title>
-  <meta name="description" content="Live demo of agentic coding skills: frontend-skill and python-science by AIwithSakthivel. Works with any AI coding assistant.">
+  <meta name="description" content="Live demo of agentic coding skills: frontend-skill and sci-experiment by AIwithSakthivel. Works with any AI coding assistant.">
   <style>
     :root {
       --sidebar-bg: #1c1917;
@@ -846,8 +846,8 @@
     <div class="skill-item" id="sb-science" onclick="selectSkill('science')">
       <div class="skill-icon icon-science">🔬</div>
       <div class="skill-meta">
-        <div class="skill-name">python-science</div>
-        <div class="skill-desc">Data science features</div>
+        <div class="skill-name">sci-experiment</div>
+        <div class="skill-desc">Scientific experiments</div>
       </div>
       <span class="skill-arrow">›</span>
     </div>
@@ -865,7 +865,7 @@
       <h4>💡 Invoke a skill</h4>
       <p>Use <span class="kbd">$skill-name</span> anywhere in your prompt:</p>
       <p style="margin-top:6px;"><span class="kbd">$frontend-skill</span> Build a responsive dashboard</p>
-      <p style="margin-top:4px;"><span class="kbd">$python-science</span> Deploy this ML script</p>
+      <p style="margin-top:4px;"><span class="kbd">$sci-experiment</span> Structure this analysis as a reproducible experiment</p>
     </div>
   </div>
 
@@ -902,7 +902,7 @@
     <p>Click a skill in the sidebar to watch your AI assistant handle a real-world engineering request using that skill.</p>
     <div class="pill-row">
       <div class="pill" onclick="selectSkill('frontend')">⚡ frontend-skill</div>
-      <div class="pill" onclick="selectSkill('science')">🔬 python-science</div>
+      <div class="pill" onclick="selectSkill('science')">🔬 sci-experiment</div>
     </div>
   </div>
 
@@ -956,14 +956,14 @@ const SKILLS = {
     panelContent: buildFrontendPanel(),
   },
   science: {
-    label: 'python-science',
+    label: 'sci-experiment',
     icon: '🔬',
     iconClass: 'icon-science',
-    tagline: 'Python data-science feature builder — from scripts to SCM-ready modules',
-    description: 'Turns scripts, notebooks, and LLM workflows into deployable Python feature packages with src/, tests/, prompt_templates/, logs/, results/, and a how-to notebook.',
-    tags: ['Python', 'Data Science', 'LLM', 'Feature Packaging', 'Notebooks', 'Testing', 'Logging'],
-    invoke: '$python-science',
-    userMsg: 'Turn this customer churn prediction notebook into a deployable feature package with tests, prompts, and a usage notebook.',
+    tagline: 'Scientific experiment structure — hypothesis, analysis, reproducibility, research documentation',
+    description: 'Guides data scientists through designing and running reproducible experiments: hypothesis-first structure, config management, notebook/src separation, baselines, result artefacts, and research briefs.',
+    tags: ['Python', 'Data Science', 'Reproducibility', 'Hypothesis Testing', 'EDA', 'Model Evaluation', 'Notebooks', 'Research'],
+    invoke: '$sci-experiment',
+    userMsg: 'Set up a reproducible experiment to test whether adding interaction features improves churn prediction on our Q2 dataset.',
     response: buildScienceResponse(),
     panelContent: buildSciencePanel(),
   }
@@ -1130,54 +1130,52 @@ function buildFrontendResponse() {
 
 function buildScienceResponse() {
   return `<div class="rt">
-    <div class="skill-active-badge">🔬 python-science active</div>
-    <p>Converting your notebook into a production-ready feature package. Here's the scaffold and the module responsibilities:</p>
-    <h3>📁 Feature structure</h3>
+    <div class="skill-active-badge">🔬 sci-experiment active</div>
+    <p>Setting up a reproducible experiment. I'll scaffold the structure, write the research brief, and separate config from code before any analysis runs.</p>
+    <h3>📁 Experiment structure</h3>
     <div class="file-tree">
-      <span class="ft-dir">feature/churn_prediction/</span>
-      <span class="ft-indent"><span class="ft-file">README.md</span></span>
+      <span class="ft-dir">experiment/churn_interaction_features/</span>
+      <span class="ft-indent"><span class="ft-file">README.md</span> <span style="color:#6c6762">← hypothesis + findings</span></span>
+      <span class="ft-indent"><span class="ft-dir">notebooks/</span></span>
+      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">01_explore.ipynb</span></span>
+      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">02_analysis.ipynb</span></span>
       <span class="ft-indent"><span class="ft-dir">src/</span></span>
-      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">config.py</span></span>
-      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">models.py</span></span>
-      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">pipeline.py</span></span>
-      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">prompt_loader.py</span></span>
-      <span class="ft-indent"><span class="ft-dir">prompt_templates/</span></span>
-      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">churn_analysis.txt</span></span>
-      <span class="ft-indent"><span class="ft-dir">tests/</span></span>
-      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">test_pipeline.py</span></span>
-      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">test_prompt_loader.py</span></span>
-      <span class="ft-indent"><span class="ft-dir">logs/</span> &nbsp;<span class="ft-dir">results/</span></span>
-      <span class="ft-indent"><span class="ft-file">how_to_use_churn_prediction.ipynb</span></span>
+      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">data_loader.py</span></span>
+      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">transforms.py</span></span>
+      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">metrics.py</span></span>
+      <span class="ft-indent"><span class="ft-dir">configs/</span></span>
+      <span class="ft-indent" style="padding-left:32px"><span class="ft-file">experiment.yaml</span> <span style="color:#6c6762">← seed, params, paths</span></span>
+      <span class="ft-indent"><span class="ft-dir">data/raw/</span> &nbsp;<span class="ft-dir">data/processed/</span></span>
+      <span class="ft-indent"><span class="ft-dir">results/figures/</span> &nbsp;<span class="ft-dir">results/tables/</span></span>
+      <span class="ft-indent"><span class="ft-file">environment.yml</span></span>
     </div>
-    <h3>🔧 Module responsibilities</h3>
+    <h3>📝 Research brief (README.md — written first)</h3>
     <div class="steps">
-      <div class="step"><div class="step-n">1</div><div><strong>config.py</strong> — all paths, model name, threshold — explicit, no magic strings inside the pipeline</div></div>
-      <div class="step"><div class="step-n">2</div><div><strong>pipeline.py</strong> — orchestrates load → preprocess → predict → write, logging stage counts at each boundary</div></div>
-      <div class="step"><div class="step-n">3</div><div><strong>prompt_templates/</strong> — LLM prompts never live inline in Python; loaded via <span class="ic">prompt_loader.py</span></div></div>
-      <div class="step"><div class="step-n">4</div><div><strong>tests/</strong> — unit-tests on prompt loading and path resolution; mocked LLM for integration path</div></div>
+      <div class="step"><div class="step-n">Q</div><div><strong>Question:</strong> Do pairwise interaction features between recency, frequency, and spend improve churn AUC on Q2 data?</div></div>
+      <div class="step"><div class="step-n">H</div><div><strong>Hypothesis:</strong> Interaction terms will capture non-linear relationships missed by individual features — expected +2–4% AUC lift</div></div>
+      <div class="step"><div class="step-n">B</div><div><strong>Baseline:</strong> Logistic regression on raw features — Q1 AUC 0.74 on validation split</div></div>
+      <div class="step"><div class="step-n">✓</div><div><strong>Success criterion:</strong> AUC ≥ 0.76 on held-out validation with no increase in false-negative rate</div></div>
     </div>
     <h3>📋 Logged on every run</h3>
     <ul>
-      <li><span class="check">✓</span> Run start / end timestamps + duration</li>
-      <li><span class="check">✓</span> Input artifact path + row count</li>
-      <li><span class="check">✓</span> Model name + prediction threshold used</li>
-      <li><span class="check">✓</span> Output path + churn rate summary</li>
-      <li><span class="check">✓</span> Warnings, retries, and failures</li>
+      <li><span class="check">✓</span> Experiment name + full config snapshot</li>
+      <li><span class="check">✓</span> Data source, version, and row counts per split</li>
+      <li><span class="check">✓</span> Stage timestamps: load → preprocess → train → evaluate</li>
+      <li><span class="check">✓</span> Metric per split (AUC, precision, recall) vs baseline</li>
+      <li><span class="check">✓</span> Random seed, library versions, any skipped samples</li>
     </ul>
-    <pre><code><span class="cm"># pipeline.py</span>
-<span class="kw">class</span> <span class="fn">ChurnPipeline</span>:
-    <span class="kw">def</span> <span class="fn">__init__</span>(self, config: Config):
-        self.config = config
-        self.log = logging.<span class="fn">getLogger</span>(__name__)
-
-    <span class="kw">def</span> <span class="fn">run</span>(self, input_path: Path) -> Path:
-        self.log.<span class="fn">info</span>(<span class="str">"start | input=%s"</span>, input_path)
-        df       = self.<span class="fn">_load</span>(input_path)
-        features = self.<span class="fn">_preprocess</span>(df)
-        preds    = self.<span class="fn">_predict</span>(features)
-        out      = self.<span class="fn">_write</span>(preds)
-        self.log.<span class="fn">info</span>(<span class="str">"end | rows=%d | out=%s"</span>, <span class="fn">len</span>(df), out)
-        <span class="kw">return</span> out</code></pre>
+    <pre><code><span class="cm"># configs/experiment.yaml</span>
+<span class="nb">experiment</span>: churn_interaction_features
+<span class="nb">seed</span>: 42
+<span class="nb">data</span>:
+  <span class="nb">source</span>: <span class="str">data/raw/q2_customers.parquet</span>
+  <span class="nb">val_split</span>: 0.2
+<span class="nb">features</span>:
+  <span class="nb">use_interactions</span>: <span class="kw">true</span>
+  <span class="nb">interaction_pairs</span>: [[<span class="str">recency</span>, <span class="str">frequency</span>], [<span class="str">frequency</span>, <span class="str">spend</span>]]
+<span class="nb">model</span>:
+  <span class="nb">type</span>: logistic_regression
+  <span class="nb">C</span>: 1.0</code></pre>
   </div>`;
 }
 
@@ -1226,50 +1224,50 @@ function buildSciencePanel() {
   return `
     <div class="panel-section">
       <h4>Description</h4>
-      <p>Build deployable Python data-science features for customer use cases. Turns scripts, notebooks, evaluation flows, and LLM/data workflows into SCM-ready modules with feature folders, src, tests, logs, results, prompt templates, and how-to notebooks.</p>
+      <p>Guides data scientists through designing and running reproducible scientific experiments — from hypothesis to findings. Structures EDA, analysis, model evaluation, and ablation studies with configs, notebooks, testable src modules, and a research brief.</p>
     </div>
     <div class="panel-section">
       <h4>Capabilities</h4>
       <div class="tag-list">
-        <span class="tag">Feature packaging</span>
-        <span class="tag">LLM pipelines</span>
-        <span class="tag">Prompt management</span>
-        <span class="tag">Logging & tracing</span>
-        <span class="tag">Unit testing</span>
+        <span class="tag">Hypothesis-first structure</span>
+        <span class="tag">Reproducibility</span>
+        <span class="tag">Config management</span>
+        <span class="tag">EDA & analysis</span>
+        <span class="tag">Model evaluation</span>
+        <span class="tag">Baseline comparison</span>
         <span class="tag">Jupyter notebooks</span>
-        <span class="tag">Data pipelines</span>
-        <span class="tag">ML deployment</span>
+        <span class="tag">Research documentation</span>
       </div>
     </div>
     <div class="panel-section">
       <h4>Default layout</h4>
       <div class="invoke-box" style="line-height:1.9">
-        feature/&lt;name&gt;/<br>
-        &nbsp;&nbsp;README.md<br>
-        &nbsp;&nbsp;src/ &nbsp;&nbsp;<span class="invoke-comment"># reusable modules</span><br>
-        &nbsp;&nbsp;tests/<br>
-        &nbsp;&nbsp;prompt_templates/<br>
-        &nbsp;&nbsp;logs/ &nbsp;&nbsp;results/ &nbsp;&nbsp;data/<br>
-        &nbsp;&nbsp;how_to_use_&lt;name&gt;.ipynb
+        experiment/&lt;name&gt;/<br>
+        &nbsp;&nbsp;README.md &nbsp;&nbsp;<span class="invoke-comment"># research brief</span><br>
+        &nbsp;&nbsp;notebooks/ &nbsp;&nbsp;src/ &nbsp;&nbsp;tests/<br>
+        &nbsp;&nbsp;configs/experiment.yaml<br>
+        &nbsp;&nbsp;data/raw/ &nbsp;&nbsp;data/processed/<br>
+        &nbsp;&nbsp;results/figures/ &nbsp;&nbsp;results/tables/<br>
+        &nbsp;&nbsp;environment.yml
       </div>
     </div>
     <div class="panel-section">
       <h4>Invoke</h4>
       <div class="invoke-box">
         <span class="invoke-comment"># In any AI coding assistant prompt:</span><br>
-        $python-science Turn this churn script into<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a deployable feature<br><br>
-        $python-science Build an LLM eval pipeline<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with prompt templates
+        $sci-experiment Set up an experiment to test<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hypothesis X on dataset Y<br><br>
+        $sci-experiment Extract this notebook into<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a reproducible experiment
       </div>
     </div>
     <div class="panel-section">
       <h4>Typical requests</h4>
       <ul style="font-size:13.5px;color:var(--text-secondary);padding-left:18px;line-height:1.7">
-        <li>Turn a script or notebook into a deployable Python feature</li>
-        <li>Build a customer use-case module with tests, prompts, and docs</li>
-        <li>Refactor an evaluation or provider workflow into a modular package</li>
-        <li>Add logging, results artifacts, and a usage notebook</li>
+        <li>Set up an experiment to test a specific hypothesis on a dataset</li>
+        <li>Add baseline comparison and metric logging to a training script</li>
+        <li>Extract a research notebook into testable src/ modules</li>
+        <li>Package an analysis so a colleague can reproduce it from scratch</li>
       </ul>
     </div>`;
 }

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sci-Experiment"
+  short_description: "Structure, run, and document scientific experiments in Python"
+  default_prompt: "Use $sci-experiment to turn this research or analysis request into a reproducible experiment with configs, notebooks, src modules, tests, and a research brief."

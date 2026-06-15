@@ -1,6 +1,6 @@
 # Agentic Skills
 
-> Plug-and-play skill definitions that turn any AI coding assistant into a domain-aware engineering specialist. Each skill is a `SKILL.md` file — drop it into your assistant's skills directory, invoke it with `$skill-name`, and your assistant adopts that skill's operating rules, architecture patterns, and quality checklists.
+> Plug-and-play skill definitions that turn any AI coding assistant into a domain-aware specialist. Each skill is a `SKILL.md` file — drop it into your assistant's skills directory, invoke it with `$skill-name`, and your assistant adopts that skill's operating rules, patterns, and quality checklists.
 
 **[▶ Live Demo](https://aiwithsakthivel.github.io/agentic-skills/)** &nbsp;|&nbsp; **[AIwithSakthivel](https://github.com/AIwithSakthivel)** &nbsp;|&nbsp; **[HuggingFace Space](https://huggingface.co/spaces/AIwithSakthivel/agentic-skills)**
 
@@ -11,21 +11,21 @@
 | Skill | What it does | Invoke |
 |-------|-------------|--------|
 | [frontend-skill](./frontend-skill/SKILL.md) | Frontend specialist — React, Vue, Angular, accessibility, responsive UI, performance, component testing | `$frontend-skill` |
-| [python-science](./python-science/SKILL.md) | Data-science feature builder — turns scripts/notebooks into SCM-ready packages with tests, prompts, logs, and usage notebooks | `$python-science` |
+| [sci-experiment](./sci-experiment/SKILL.md) | Scientific experiment structure — hypothesis-first, reproducible, with configs, notebooks, src modules, baselines, and research documentation | `$sci-experiment` |
 
 ---
 
 ## What is a skill?
 
-A skill is a `SKILL.md` file that defines how your AI assistant should approach a domain. When you prefix a prompt with `$skill-name`, the assistant loads the skill's context — its operating rules, architecture patterns, and quality checklist — before generating a response.
+A skill is a `SKILL.md` file that defines how your AI assistant should approach a domain. When you prefix a prompt with `$skill-name`, the assistant loads the skill's context — its operating rules, patterns, and quality checklist — before responding.
 
 ```
-$frontend-skill Build a responsive data table with accessible sorting
+$sci-experiment Set up a reproducible experiment to test hypothesis X on dataset Y
 ```
 
-The assistant responds as a focused frontend specialist, automatically applying the accessibility checklist, performance guidelines, and testing expectations from that skill.
+The assistant responds as a focused scientific experiment specialist, applying the hypothesis structure, reproducibility rules, config conventions, and research documentation pattern from that skill.
 
-Works with any AI coding assistant that supports skill/context files (Codex, and others).
+Works with any AI coding assistant that supports skill or context files.
 
 ---
 
@@ -41,14 +41,14 @@ git clone https://github.com/AIwithSakthivel/agentic-skills.git
 
 ```bash
 cp -r agentic-skills/frontend-skill ~/.your-assistant/skills/
-cp -r agentic-skills/python-science  ~/.your-assistant/skills/
+cp -r agentic-skills/sci-experiment  ~/.your-assistant/skills/
 ```
 
 ### 3. Invoke in any prompt
 
 ```bash
 $frontend-skill Build a modal dialog with focus trap and keyboard dismiss
-$python-science  Turn this evaluation script into a deployable feature with tests
+$sci-experiment  Set up an experiment to test whether feature X improves AUC on this dataset
 ```
 
 ---
@@ -57,12 +57,12 @@ $python-science  Turn this evaluation script into a deployable feature with test
 
 ### `frontend-skill`
 
-Guides modern frontend implementation with maintainable structure, predictable behavior, accessibility, and performance.
+Guides modern frontend implementation with maintainable structure, predictable behaviour, accessibility, and performance.
 
 **Covers:**
 - Component-driven architecture (React / Vue / Angular / vanilla JS)
 - Responsive layouts and CSS design tokens
-- Accessibility — keyboard nav, ARIA, focus management, color contrast
+- Accessibility — keyboard nav, ARIA, focus management, colour contrast
 - Performance — code splitting, render optimisation, image sizing
 - Testing — unit, integration, E2E, accessibility assertions
 
@@ -70,24 +70,26 @@ Guides modern frontend implementation with maintainable structure, predictable b
 
 ---
 
-### `python-science`
+### `sci-experiment`
 
-Turns scripts and notebooks into production-ready Python feature packages with full traceability.
+Guides data scientists through designing and running reproducible scientific experiments — from hypothesis to findings.
 
 **Covers:**
-- SCM-ready feature layout: `src/`, `tests/`, `prompt_templates/`, `logs/`, `results/`
-- Modular Python — `config.py`, `models.py`, `pipeline.py`, `prompt_loader.py`
-- LLM-backed feature structure with external prompt management
-- Logging baseline: run timestamps, artifact paths, row counts, model usage
-- Onboarding notebooks (`how_to_use_<feature>.ipynb`)
+- Hypothesis-first structure: question, method, baseline, success criterion, findings
+- Experiment layout: `notebooks/`, `src/`, `configs/`, `data/raw`, `results/`, `environment.yml`
+- Config management — all parameters (seeds, hyperparameters, paths) in `configs/`, never hardcoded
+- Notebook / src separation — explore in notebooks, extract stable logic to `src/`
+- Reproducibility checklist — seed pinning, environment lock, deterministic data processing
+- Research brief (`README.md`) as the primary deliverable
+- LLM-backed experiment support via `configs/prompts/` and a provider interface
 
-**Invoke:** `$python-science <your request>`
+**Invoke:** `$sci-experiment <your request>`
 
 ---
 
 ## Demo UI
 
-The [live demo](https://aiwithsakthivel.github.io/agentic-skills/) is a static single-page app (`index.html`) that shows each skill handling a realistic engineering request with an animated AI response. No build step — just open in a browser.
+The [live demo](https://aiwithsakthivel.github.io/agentic-skills/) is a static single-page app (`index.html`) that shows each skill handling a realistic request with an animated response. No build step — just open in a browser.
 
 ```bash
 open index.html
@@ -97,7 +99,7 @@ open index.html
 
 ## HuggingFace
 
-Also available as a [HuggingFace Space](https://huggingface.co/spaces/AIwithSakthivel/agentic-skills) (static HTML). The `SKILL.md` files are context definitions, not model weights — but the interactive demo shows their output in a familiar interface.
+Also available as a [HuggingFace Space](https://huggingface.co/spaces/AIwithSakthivel/agentic-skills) (static HTML). The `SKILL.md` files are context definitions, not model weights — but the interactive demo shows their effect in a familiar interface.
 
 ---
 
@@ -105,19 +107,19 @@ Also available as a [HuggingFace Space](https://huggingface.co/spaces/AIwithSakt
 
 ```
 agentic-skills/
-├── index.html                    ← Live demo UI (GitHub Pages)
+├── index.html                       ← Live demo UI (GitHub Pages)
 ├── README.md
 ├── frontend-skill/
 │   ├── SKILL.md
 │   └── agents/openai.yaml
-└── python-science/
+└── sci-experiment/
     ├── SKILL.md
     ├── agents/openai.yaml
     └── references/
-        ├── feature-pattern.md
-        ├── docs-and-logbook.md
-        ├── llm-feature-pattern.md
-        └── validation-pattern.md
+        ├── experiment-pattern.md
+        ├── research-docs.md
+        ├── validation-pattern.md
+        └── llm-experiment-pattern.md
 ```
 
 ---
