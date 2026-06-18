@@ -1,0 +1,4 @@
+interface:
+  display_name: "Concept Tutor"
+  short_description: "Research-grounded science tutor for data scientists and ML practitioners"
+  default_prompt: "Use $concept-tutor to teach me a concept deeply — with intuition, formulas, research references, enterprise use cases, and self-assessment questions to know before moving on."

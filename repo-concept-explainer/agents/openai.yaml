@@ -1,0 +1,4 @@
+interface:
+  display_name: "Repo Concept Explainer"
+  short_description: "Explain repo concepts from code and data"
+  default_prompt: "Use $repo-concept-explainer to explain how this repo implements a concept, with code, data examples, formulas, tests, and design context."

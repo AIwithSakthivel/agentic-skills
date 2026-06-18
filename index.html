@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agentic Skills — AIwithSakthivel</title>
-  <meta name="description" content="Live demo of agentic coding skills: frontend-skill and sci-experiment by AIwithSakthivel. Works with any AI coding assistant.">
+  <meta name="description" content="Live demo of agentic coding skills: frontend-skill, sci-experiment, concept-tutor, and repo-concept-explainer by AIwithSakthivel. Works with any AI coding assistant.">
   <style>
     :root {
       --sidebar-bg: #1c1917;
@@ -147,8 +147,10 @@
       flex-shrink: 0;
     }
 
-    .icon-frontend { background: #1a3558; }
-    .icon-science  { background: #0f3a28; }
+    .icon-frontend  { background: #1a3558; }
+    .icon-science   { background: #0f3a28; }
+    .icon-tutor     { background: #2d1a58; }
+    .icon-repo      { background: #3a1a1a; }
 
     .skill-meta { flex: 1; min-width: 0; }
 
@@ -852,6 +854,24 @@
       <span class="skill-arrow">›</span>
     </div>
 
+    <div class="skill-item" id="sb-tutor" onclick="selectSkill('tutor')">
+      <div class="skill-icon icon-tutor">🎓</div>
+      <div class="skill-meta">
+        <div class="skill-name">concept-tutor</div>
+        <div class="skill-desc">Research science tutor</div>
+      </div>
+      <span class="skill-arrow">›</span>
+    </div>
+
+    <div class="skill-item" id="sb-repo" onclick="selectSkill('repo')">
+      <div class="skill-icon icon-repo">🗂</div>
+      <div class="skill-meta">
+        <div class="skill-name">repo-concept-explainer</div>
+        <div class="skill-desc">Explain concepts from code</div>
+      </div>
+      <span class="skill-arrow">›</span>
+    </div>
+
     <div class="add-btn">
       <span style="font-size:17px;line-height:1">+</span>
       <span>Add skill</span>
@@ -864,8 +884,8 @@
     <div class="how-to-use-box">
       <h4>💡 Invoke a skill</h4>
       <p>Use <span class="kbd">$skill-name</span> anywhere in your prompt:</p>
-      <p style="margin-top:6px;"><span class="kbd">$frontend-skill</span> Build a responsive dashboard</p>
-      <p style="margin-top:4px;"><span class="kbd">$sci-experiment</span> Structure this analysis as a reproducible experiment</p>
+      <p style="margin-top:6px;"><span class="kbd">$concept-tutor</span> Teach me attention mechanisms</p>
+      <p style="margin-top:4px;"><span class="kbd">$repo-concept-explainer</span> Explain how scoring works here</p>
     </div>
   </div>
 
@@ -903,6 +923,8 @@
     <div class="pill-row">
       <div class="pill" onclick="selectSkill('frontend')">⚡ frontend-skill</div>
       <div class="pill" onclick="selectSkill('science')">🔬 sci-experiment</div>
+      <div class="pill" onclick="selectSkill('tutor')">🎓 concept-tutor</div>
+      <div class="pill" onclick="selectSkill('repo')">🗂 repo-concept-explainer</div>
     </div>
   </div>
 
@@ -966,6 +988,30 @@ const SKILLS = {
     userMsg: 'Set up a reproducible experiment to test whether adding interaction features improves churn prediction on our Q2 dataset.',
     response: buildScienceResponse(),
     panelContent: buildSciencePanel(),
+  },
+  tutor: {
+    label: 'concept-tutor',
+    icon: '🎓',
+    iconClass: 'icon-tutor',
+    tagline: 'Research-grounded science tutor — formulas, derivations, papers, enterprise tradeoffs, self-assessment',
+    description: 'Teaches any ML, statistics, or data science concept deeply — from intuition through formalism, research trail, enterprise lens, and self-assessment. Designed for data scientists raising their bar for research and production roles.',
+    tags: ['Machine Learning', 'Statistics', 'NLP', 'Retrieval', 'Causal Inference', 'MLOps', 'Research Papers', 'Formula Cards'],
+    invoke: '$concept-tutor',
+    userMsg: 'Teach me cross-entropy loss — intuition, formula card, derivation, and questions to know before moving on.',
+    response: buildTutorResponse(),
+    panelContent: buildTutorPanel(),
+  },
+  repo: {
+    label: 'repo-concept-explainer',
+    icon: '🗂',
+    iconClass: 'icon-repo',
+    tagline: 'Repository-grounded concept explainer — traces code, data, tests, and architecture',
+    description: 'Explains what a concept means inside a specific codebase. Starts from source files, tests, configs, and sample data — then adds scientific and mathematical context after the implementation is traced.',
+    tags: ['Code Tracing', 'Architecture', 'Data Samples', 'Formulas', 'Standalone Tests', 'Design Intent', 'Python', 'ML Systems'],
+    invoke: '$repo-concept-explainer',
+    userMsg: 'Explain how the experiment config is validated and applied in this repo — show me the code path, a data example, and how to test it standalone.',
+    response: buildRepoResponse(),
+    panelContent: buildRepoPanel(),
   }
 };
 
@@ -1268,6 +1314,193 @@ function buildSciencePanel() {
         <li>Add baseline comparison and metric logging to a training script</li>
         <li>Extract a research notebook into testable src/ modules</li>
         <li>Package an analysis so a colleague can reproduce it from scratch</li>
+      </ul>
+    </div>`;
+}
+
+function buildTutorResponse() {
+  return `<div class="rt">
+    <div class="skill-active-badge">🎓 concept-tutor active</div>
+    <p><strong>Objective:</strong> Understand cross-entropy loss — why it exists, how the formula works, what it optimises, and when it breaks.</p>
+    <h3>💡 Intuition first</h3>
+    <p>Your model outputs a probability distribution over classes. Cross-entropy measures how <em>surprised</em> the true label makes that distribution — lower is better. A confident correct prediction gives near-zero loss; a confident wrong prediction gives very high loss.</p>
+    <h3>📐 Formula card</h3>
+    <div class="file-tree" style="font-family:inherit;font-size:13px;line-height:1.85">
+      <strong>Name:</strong> Cross-Entropy Loss (binary)<br>
+      <strong>Purpose:</strong> Penalise the model's predicted probability for the true class.<br><br>
+      <strong>Math:</strong> &nbsp; L = −[y · log(p) + (1−y) · log(1−p)]<br>
+      <strong>Plain:</strong> &nbsp;&nbsp; loss = −(true_label × log(predicted_prob) + (1−label) × log(1−predicted_prob))<br><br>
+      <strong>Symbols:</strong> y ∈ {0,1} true label · p ∈ (0,1) predicted probability<br>
+      <strong>Read aloud:</strong> "Negative log-likelihood of the true label under the model."<br>
+      <strong>Hook:</strong> log(p) punishes near-zero predictions exponentially harder than near-1.<br><br>
+      <strong>Tiny example:</strong> y=1, p=0.9 → L = −log(0.9) ≈ 0.10 ✓<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y=1, p=0.1 → L = −log(0.1) ≈ 2.30 ✗ (bad)
+    </div>
+    <h3>⚙️ Why it works — MLE connection</h3>
+    <div class="steps">
+      <div class="step"><div class="step-n">1</div><div>Assume labels are Bernoulli(p). The log-likelihood of the dataset is Σ y·log(p) + (1−y)·log(1−p).</div></div>
+      <div class="step"><div class="step-n">2</div><div>Minimising cross-entropy = maximising this log-likelihood. The model learns the true data-generating distribution.</div></div>
+      <div class="step"><div class="step-n">3</div><div>With softmax outputs, CE is equivalent to KL divergence from one-hot labels plus entropy — it minimises distributional mismatch.</div></div>
+    </div>
+    <h3>📚 Research trail</h3>
+    <ul>
+      <li><strong>Shannon (1948)</strong> — entropy as the theoretical foundation; CE as cross-distribution divergence.</li>
+      <li><strong>Goodfellow et al., Deep Learning (2016)</strong> Ch. 6 — connects MLE to CE loss for neural nets.</li>
+      <li><strong>Label smoothing (Szegedy et al., CVPR 2016)</strong> — replaces hard 0/1 targets with ε-soft targets to prevent overconfidence; widely used in production classifiers.</li>
+    </ul>
+    <h3>✅ Questions to know before moving on</h3>
+    <ul>
+      <li>Why does log(p→0) → ∞? What does that mean for training stability?</li>
+      <li>What assumption does CE make about the label distribution?</li>
+      <li>When would you prefer focal loss over CE? (hint: class imbalance)</li>
+      <li>How does temperature scaling interact with CE at inference time?</li>
+    </ul>
+  </div>`;
+}
+
+function buildTutorPanel() {
+  return `
+    <div class="panel-section">
+      <h4>Description</h4>
+      <p>A rigorous, research-grounded science tutor for advanced technical learners — especially data scientists and ML practitioners targeting research and production roles. Teaches from intuition through formalism, research trail, enterprise lens, and self-assessment.</p>
+    </div>
+    <div class="panel-section">
+      <h4>Capabilities</h4>
+      <div class="tag-list">
+        <span class="tag">Intuition → Formalism</span>
+        <span class="tag">Formula cards</span>
+        <span class="tag">Derivations</span>
+        <span class="tag">Research papers</span>
+        <span class="tag">NeurIPS / ICML / ICLR</span>
+        <span class="tag">Enterprise tradeoffs</span>
+        <span class="tag">Self-assessment gates</span>
+        <span class="tag">Active practice</span>
+      </div>
+    </div>
+    <div class="panel-section">
+      <h4>What you get per lesson</h4>
+      <div class="invoke-box" style="line-height:1.9">
+        Intuition → Formalism → Mechanism<br>
+        Formula card: name · purpose · symbols ·<br>
+        &nbsp;&nbsp;read-aloud · hook · example · sensitivity<br>
+        Research trail: seminal + conference papers<br>
+        Enterprise lens: accuracy/latency/cost/risk<br>
+        Self-check: 5–10 questions across recall,<br>
+        &nbsp;&nbsp;derivation, application, failure modes
+      </div>
+    </div>
+    <div class="panel-section">
+      <h4>Invoke</h4>
+      <div class="invoke-box">
+        <span class="invoke-comment"># In any AI coding assistant prompt:</span><br>
+        $concept-tutor Teach me attention mechanisms<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— intuition, formula, papers<br><br>
+        $concept-tutor Deep dive into NDCG and its<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;limitations in production ranking
+      </div>
+    </div>
+    <div class="panel-section">
+      <h4>Typical requests</h4>
+      <ul style="font-size:13.5px;color:var(--text-secondary);padding-left:18px;line-height:1.7">
+        <li>Teach a concept from ML, NLP, retrieval, causal inference, or MLOps</li>
+        <li>Break down a formula with a readable card and worked example</li>
+        <li>Summarise what a seminal paper contributed and why it matters</li>
+        <li>Compare two methods with enterprise tradeoffs (accuracy vs latency vs cost)</li>
+        <li>Give me questions to self-assess before moving on</li>
+      </ul>
+    </div>`;
+}
+
+function buildRepoResponse() {
+  return `<div class="rt">
+    <div class="skill-active-badge">🗂 repo-concept-explainer active</div>
+    <p><strong>Concept anchor:</strong> <span class="ic">configs/experiment.yaml</span> is the single source of truth for all run parameters. The repo reads, validates, and propagates it before any data or model code executes.</p>
+    <h3>🔍 Repo evidence</h3>
+    <div class="file-tree">
+      <span class="ft-dir">experiment/churn_interaction_features/</span>
+      <span class="ft-indent"><span class="ft-file">configs/experiment.yaml</span> <span style="color:#6c6762">← all params live here</span></span>
+      <span class="ft-indent"><span class="ft-file">src/config_loader.py</span> &nbsp;&nbsp;<span style="color:#6c6762">← load + validate</span></span>
+      <span class="ft-indent"><span class="ft-file">src/data_loader.py</span> &nbsp;&nbsp;&nbsp;<span style="color:#6c6762">← consumes cfg.data.*</span></span>
+      <span class="ft-indent"><span class="ft-file">tests/test_config.py</span> &nbsp;<span style="color:#6c6762">← schema assertions</span></span>
+    </div>
+    <h3>⚙️ How it flows</h3>
+    <div class="steps">
+      <div class="step"><div class="step-n">1</div><div><span class="ic">config_loader.load("configs/experiment.yaml")</span> — reads YAML, resolves paths relative to repo root, raises <span class="ic">ConfigError</span> on missing required keys.</div></div>
+      <div class="step"><div class="step-n">2</div><div>Each module receives <span class="ic">cfg</span> as a typed dataclass. No module reads the YAML file directly — all params flow through the validated object.</div></div>
+      <div class="step"><div class="step-n">3</div><div>At run start, the full config is serialised to <span class="ic">results/run_config.json</span> so any result is reproducible from that snapshot.</div></div>
+    </div>
+    <h3>📋 Data example (experiment.yaml)</h3>
+    <pre><code><span class="cm"># configs/experiment.yaml</span>
+<span class="nb">experiment</span>: churn_interaction_features
+<span class="nb">seed</span>: 42
+<span class="nb">data</span>:
+  <span class="nb">source</span>: <span class="str">data/raw/q2_customers.parquet</span>
+  <span class="nb">val_split</span>: 0.2         <span class="cm"># validated: must be in (0, 1)</span>
+<span class="nb">features</span>:
+  <span class="nb">use_interactions</span>: <span class="kw">true</span>
+<span class="nb">model</span>:
+  <span class="nb">type</span>: logistic_regression
+  <span class="nb">C</span>: 1.0                  <span class="cm"># validated: must be > 0</span></code></pre>
+    <h3>🧪 Standalone test</h3>
+    <pre><code><span class="cm"># From repo root — isolates config validation</span>
+<span class="kw">from</span> <span class="fn">src.config_loader</span> <span class="kw">import</span> load
+cfg = <span class="fn">load</span>(<span class="str">"configs/experiment.yaml"</span>)
+<span class="kw">assert</span> cfg.seed == 42
+<span class="kw">assert</span> 0 < cfg.data.val_split < 1
+<span class="fn">print</span>(cfg)  <span class="cm"># inspect full validated object</span></code></pre>
+    <p style="margin-top:8px;font-size:12.5px;color:var(--text-muted)"><strong>Design role:</strong> Centralising params here means changing a hyperparameter never touches model code — only the YAML changes, the log captures it, and the result is reproducible.</p>
+  </div>`;
+}
+
+function buildRepoPanel() {
+  return `
+    <div class="panel-section">
+      <h4>Description</h4>
+      <p>Explains technical concepts grounded in a specific repository — source files, tests, configs, datasets, schemas, sample data, and architecture. Starts from the codebase as the source of truth, then adds scientific context after the implementation is traced.</p>
+    </div>
+    <div class="panel-section">
+      <h4>Capabilities</h4>
+      <div class="tag-list">
+        <span class="tag">Code tracing</span>
+        <span class="tag">Data samples</span>
+        <span class="tag">Test fixtures</span>
+        <span class="tag">Formula mapping</span>
+        <span class="tag">Standalone snippets</span>
+        <span class="tag">Design intent</span>
+        <span class="tag">Evidence vs inference</span>
+        <span class="tag">Architecture</span>
+      </div>
+    </div>
+    <div class="panel-section">
+      <h4>What you get per explanation</h4>
+      <div class="invoke-box" style="line-height:1.9">
+        Concept anchor: file + symbol + location<br>
+        What · Why · How (repo-specific)<br>
+        Repo evidence: paths, functions, tests<br>
+        Data example from fixtures or samples<br>
+        Formula card mapped to implementation<br>
+        Standalone test / dry-run command<br>
+        Design role: what breaks if it changes
+      </div>
+    </div>
+    <div class="panel-section">
+      <h4>Invoke</h4>
+      <div class="invoke-box">
+        <span class="invoke-comment"># In any AI coding assistant prompt:</span><br>
+        $repo-concept-explainer Explain how<br>
+        &nbsp;&nbsp;embedding similarity is scored here<br><br>
+        $repo-concept-explainer Why does this<br>
+        &nbsp;&nbsp;retriever re-rank after first-pass recall?
+      </div>
+    </div>
+    <div class="panel-section">
+      <h4>Typical requests</h4>
+      <ul style="font-size:13.5px;color:var(--text-secondary);padding-left:18px;line-height:1.7">
+        <li>Explain what a function, class, or algorithm does in this repo</li>
+        <li>Show how a config, schema, or dataset field is used end-to-end</li>
+        <li>Trace a design choice and explain why it exists for this use case</li>
+        <li>Give me a standalone test or snippet to verify this concept works</li>
+        <li>Map a formula to the implementation — show me which variable is which</li>
       </ul>
     </div>`;
 }
