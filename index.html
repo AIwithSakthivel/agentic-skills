@@ -997,7 +997,7 @@ const SKILLS = {
     description: 'Teaches any ML, statistics, or data science concept deeply — from intuition through formalism, research trail, enterprise lens, and self-assessment. Designed for data scientists raising their bar for research and production roles.',
     tags: ['Machine Learning', 'Statistics', 'NLP', 'Retrieval', 'Causal Inference', 'MLOps', 'Research Papers', 'Formula Cards'],
     invoke: '$concept-tutor',
-    userMsg: 'Teach me cross-entropy loss — intuition, formula card, derivation, and questions to know before moving on.',
+    userMsg: 'Teach me scaled dot-product attention — intuition, full formula card, why √d_k matters with the softmax saturation proof, multi-head extension, research trail from Bahdanau to Flash Attention, production tradeoffs, and 8 self-assessment questions.',
     response: buildTutorResponse(),
     panelContent: buildTutorPanel(),
   },
@@ -1009,7 +1009,7 @@ const SKILLS = {
     description: 'Explains what a concept means inside a specific codebase. Starts from source files, tests, configs, and sample data — then adds scientific and mathematical context after the implementation is traced.',
     tags: ['Code Tracing', 'Architecture', 'Data Samples', 'Formulas', 'Standalone Tests', 'Design Intent', 'Python', 'ML Systems'],
     invoke: '$repo-concept-explainer',
-    userMsg: 'Explain how the experiment config is validated and applied in this repo — show me the code path, a data example, and how to test it standalone.',
+    userMsg: 'Explain how dense retrieval scoring works in this repo — trace the full pipeline from query to score, map the cosine similarity formula to the implementation, walk through a real data example with vectors, and give me a standalone pytest I can run right now.',
     response: buildRepoResponse(),
     panelContent: buildRepoPanel(),
   }
@@ -1321,40 +1321,81 @@ function buildSciencePanel() {
 function buildTutorResponse() {
   return `<div class="rt">
     <div class="skill-active-badge">🎓 concept-tutor active</div>
-    <p><strong>Objective:</strong> Understand cross-entropy loss — why it exists, how the formula works, what it optimises, and when it breaks.</p>
-    <h3>💡 Intuition first</h3>
-    <p>Your model outputs a probability distribution over classes. Cross-entropy measures how <em>surprised</em> the true label makes that distribution — lower is better. A confident correct prediction gives near-zero loss; a confident wrong prediction gives very high loss.</p>
-    <h3>📐 Formula card</h3>
-    <div class="file-tree" style="font-family:inherit;font-size:13px;line-height:1.85">
-      <strong>Name:</strong> Cross-Entropy Loss (binary)<br>
-      <strong>Purpose:</strong> Penalise the model's predicted probability for the true class.<br><br>
-      <strong>Math:</strong> &nbsp; L = −[y · log(p) + (1−y) · log(1−p)]<br>
-      <strong>Plain:</strong> &nbsp;&nbsp; loss = −(true_label × log(predicted_prob) + (1−label) × log(1−predicted_prob))<br><br>
-      <strong>Symbols:</strong> y ∈ {0,1} true label · p ∈ (0,1) predicted probability<br>
-      <strong>Read aloud:</strong> "Negative log-likelihood of the true label under the model."<br>
-      <strong>Hook:</strong> log(p) punishes near-zero predictions exponentially harder than near-1.<br><br>
-      <strong>Tiny example:</strong> y=1, p=0.9 → L = −log(0.9) ≈ 0.10 ✓<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y=1, p=0.1 → L = −log(0.1) ≈ 2.30 ✗ (bad)
+    <p><strong>Objective:</strong> Understand scaled dot-product attention — the mechanism that lets every token attend to every other token, why the scale factor exists, what the softmax saturation problem is, how multi-head attention extends it, and where it fails in production.</p>
+
+    <h3>💡 Intuition — the database analogy</h3>
+    <p>Think of attention as a soft, differentiable lookup. You have a <strong>query</strong> Q (what you're looking for), a set of <strong>keys</strong> K (what each position advertises), and <strong>values</strong> V (what each position actually contains). Attention computes a similarity score between Q and every K, turns those scores into a probability distribution via softmax, then returns a weighted sum of V. Unlike a hard database lookup that returns one row, attention blends all rows by relevance — and every weight is differentiable, so the whole thing trains end-to-end.</p>
+
+    <h3>📐 Formula card — scaled dot-product attention</h3>
+    <div class="file-tree" style="font-family:inherit;font-size:12.5px;line-height:1.9">
+      <strong>Name:</strong> Scaled Dot-Product Attention<br>
+      <strong>Purpose:</strong> For each query, compute a relevance-weighted blend of all values.<br><br>
+      <strong>Math:</strong><br>
+      &nbsp;&nbsp;Attention(Q, K, V) = softmax( QKᵀ / √d_k ) · V<br><br>
+      <strong>Plain:</strong><br>
+      &nbsp;&nbsp;scores = dot(queries, keys.T) / sqrt(key_dim)<br>
+      &nbsp;&nbsp;weights = softmax(scores, axis=-1)<br>
+      &nbsp;&nbsp;output = weights @ values<br><br>
+      <strong>Symbols:</strong><br>
+      &nbsp;&nbsp;Q ∈ ℝ^(n×d_k) — query matrix, n tokens, d_k dims<br>
+      &nbsp;&nbsp;K ∈ ℝ^(m×d_k) — key matrix, m context tokens<br>
+      &nbsp;&nbsp;V ∈ ℝ^(m×d_v) — value matrix, same m tokens<br>
+      &nbsp;&nbsp;√d_k &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— scaling constant<br><br>
+      <strong>Read aloud:</strong> "Apply softmax to the scaled similarity matrix, then use it to blend the values."<br>
+      <strong>Memory hook:</strong> Q asks, K answers with a score, V delivers the content.<br><br>
+      <strong>Tiny example</strong> (d_k = 2, 2 tokens):<br>
+      &nbsp;&nbsp;Q = [[1, 0]], K = [[1, 0], [0, 1]], V = [[10], [20]]<br>
+      &nbsp;&nbsp;raw scores = [1·1+0·0, 1·0+0·1] / √2 = [0.71, 0.0]<br>
+      &nbsp;&nbsp;softmax → [0.67, 0.33]<br>
+      &nbsp;&nbsp;output = 0.67×10 + 0.33×20 = <strong>13.3</strong> — biased toward token 1 ✓
     </div>
-    <h3>⚙️ Why it works — MLE connection</h3>
+
+    <h3>⚙️ Why √d_k? — the softmax saturation problem</h3>
     <div class="steps">
-      <div class="step"><div class="step-n">1</div><div>Assume labels are Bernoulli(p). The log-likelihood of the dataset is Σ y·log(p) + (1−y)·log(1−p).</div></div>
-      <div class="step"><div class="step-n">2</div><div>Minimising cross-entropy = maximising this log-likelihood. The model learns the true data-generating distribution.</div></div>
-      <div class="step"><div class="step-n">3</div><div>With softmax outputs, CE is equivalent to KL divergence from one-hot labels plus entropy — it minimises distributional mismatch.</div></div>
+      <div class="step"><div class="step-n">1</div><div><strong>Variance grows with d_k.</strong> Each element of QKᵀ is a sum of d_k products of random variables with mean 0, variance 1. By CLT, the dot product has variance d_k. Without scaling, scores grow as O(√d_k).</div></div>
+      <div class="step"><div class="step-n">2</div><div><strong>Softmax saturates.</strong> Large logits push softmax toward a one-hot distribution — one token gets weight ≈ 1, all others ≈ 0. The gradient of softmax near saturation is ≈ 0. Training stalls.</div></div>
+      <div class="step"><div class="step-n">3</div><div><strong>Dividing by √d_k restores unit variance.</strong> Scores remain in a regime where softmax stays diffuse and gradients flow. Vaswani et al. verified empirically that other scalings (1/d_k, learned) perform worse.</div></div>
+      <div class="step"><div class="step-n">4</div><div><strong>Numeric check:</strong> d_k=64 → without scale, scores can reach ±8; softmax gives weights like [0.999, 0.001]. With √64=8 divisor, scores ≈ ±1; softmax gives weights like [0.73, 0.27] — informative and trainable.</div></div>
     </div>
+
+    <h3>🔀 Multi-head attention</h3>
+    <p>Run h independent attention heads in parallel, each with its own W_Q, W_K, W_V projections (size d_model/h). Concatenate all head outputs, project back with W_O. Each head can specialise: one tracks syntax, another coreference, another long-range dependencies. Formally:</p>
+    <div class="file-tree" style="font-family:inherit;font-size:12.5px;line-height:1.8">
+      MultiHead(Q,K,V) = Concat(head₁, …, headₕ) · W_O<br>
+      where headᵢ = Attention(Q·W_Qᵢ, K·W_Kᵢ, V·W_Vᵢ)<br><br>
+      Cost: h heads × O(n²·d_k) each = O(n²·d_model) total<br>
+      — same as one head at full dimension, but richer representations.
+    </div>
+
     <h3>📚 Research trail</h3>
     <ul>
-      <li><strong>Shannon (1948)</strong> — entropy as the theoretical foundation; CE as cross-distribution divergence.</li>
-      <li><strong>Goodfellow et al., Deep Learning (2016)</strong> Ch. 6 — connects MLE to CE loss for neural nets.</li>
-      <li><strong>Label smoothing (Szegedy et al., CVPR 2016)</strong> — replaces hard 0/1 targets with ε-soft targets to prevent overconfidence; widely used in production classifiers.</li>
+      <li><strong>Bahdanau et al., ICLR 2015</strong> — additive attention for seq2seq MT. First showed attention outperforms fixed-length encoder bottleneck. Limitation: O(n·m) but no parallelism across positions.</li>
+      <li><strong>Vaswani et al., NeurIPS 2017 — "Attention Is All You Need"</strong> — replaced RNNs entirely with self-attention + FFN. Introduced multi-head, positional encoding, and the Transformer block. Benchmark: 28.4 BLEU on WMT EN-DE, 2× faster to train than LSTM.</li>
+      <li><strong>Child et al., NeurIPS 2019 — Sparse Transformer</strong> — reduces O(n²) to O(n√n) with strided + local attention patterns. Enables sequences of 12,288 tokens.</li>
+      <li><strong>Dao et al., NeurIPS 2022 — Flash Attention</strong> — IO-aware exact attention. Fuses softmax + matmul into one CUDA kernel, tiles computation to stay in SRAM. Reduces HBM reads from O(n²) to O(n) — 2–4× wall-clock speedup, 5–20× memory reduction. No approximation.</li>
+      <li><strong>Flash Attention 2, ICLR 2024</strong> — further improves parallelism across the sequence dimension; achieves ~72% of A100 peak FLOPS.</li>
     </ul>
-    <h3>✅ Questions to know before moving on</h3>
+
+    <h3>🏭 Enterprise lens — production tradeoffs</h3>
+    <div class="steps">
+      <div class="step"><div class="step-n">⚡</div><div><strong>Quadratic cost.</strong> Self-attention is O(n²·d) in time and O(n²) in memory for sequence length n. At n=8K, the attention matrix is 256M floats — 1 GB in fp32. Use Flash Attention or sliding-window attention (Longformer) for long-context workloads.</div></div>
+      <div class="step"><div class="step-n">💾</div><div><strong>KV cache at inference.</strong> Autoregressive generation recomputes K, V for every new token unless cached. KV cache trades memory for latency: stores O(n·d·layers) per request. At 100K context, cache alone can exceed 10 GB per request — critical for serving cost.</div></div>
+      <div class="step"><div class="step-n">🔢</div><div><strong>Quantisation.</strong> INT8 attention weights and KV cache cut memory 2×. FP8 is now standard in H100 deployments. Attention scores must stay in higher precision to avoid softmax underflow — typical pattern: compute scores in FP32, store K/V in INT8.</div></div>
+      <div class="step"><div class="step-n">📉</div><div><strong>When attention fails.</strong> (1) Very long sequences: quadratic cost exceeds budget. (2) Strict positional invariance needed: attention is permutation-equivariant — position encodings are a patch, not a fix. (3) Tiny data regimes: self-attention over-fits faster than convolutions or MLPs because it has O(d²) parameters per layer.</div></div>
+    </div>
+
+    <h3>✅ Self-assessment — questions to know before moving on</h3>
     <ul>
-      <li>Why does log(p→0) → ∞? What does that mean for training stability?</li>
-      <li>What assumption does CE make about the label distribution?</li>
-      <li>When would you prefer focal loss over CE? (hint: class imbalance)</li>
-      <li>How does temperature scaling interact with CE at inference time?</li>
+      <li><strong>Recall:</strong> Write the Attention(Q,K,V) formula from memory and define every symbol.</li>
+      <li><strong>Derivation:</strong> Prove that Var(qᵀk) = d_k when q,k ~ N(0,1). Why does this justify the √d_k divisor?</li>
+      <li><strong>Intuition:</strong> If softmax receives logits [10, 10.1], what is the gradient with respect to those logits? What does that tell you about training dynamics?</li>
+      <li><strong>Mechanism:</strong> Walk through multi-head attention step-by-step for h=2, d_model=4. What shapes are W_Q, W_K, W_V, W_O?</li>
+      <li><strong>Comparison:</strong> What is the key algorithmic difference between Bahdanau additive attention and scaled dot-product attention? When would additive attention be preferred?</li>
+      <li><strong>Failure mode:</strong> Your model processes 32K-token documents at inference. Describe two concrete failure modes and which system-level mitigation you would apply first.</li>
+      <li><strong>Research literacy:</strong> Flash Attention claims no approximation — how does it achieve memory reduction if it still computes the exact attention output?</li>
+      <li><strong>Enterprise judgment:</strong> You're serving a 70B-parameter LLM with 128K context. Estimate KV cache size per request (assume d_model=8192, 80 layers, 2 bytes/param). At what point does this exceed a single A100 GPU's 80 GB memory?</li>
     </ul>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:6px"><strong>Score guide:</strong> 0 = needs lookup · 1 = partial · 2 = correct with minor gaps · 3 = can teach, apply, and critique. Aim for 2–3 on all eight before moving to positional encodings or sparse attention variants.</p>
   </div>`;
 }
 
@@ -1414,41 +1455,91 @@ function buildTutorPanel() {
 function buildRepoResponse() {
   return `<div class="rt">
     <div class="skill-active-badge">🗂 repo-concept-explainer active</div>
-    <p><strong>Concept anchor:</strong> <span class="ic">configs/experiment.yaml</span> is the single source of truth for all run parameters. The repo reads, validates, and propagates it before any data or model code executes.</p>
-    <h3>🔍 Repo evidence</h3>
+    <p><strong>Concept anchor:</strong> <span class="ic">DenseRetriever</span> in <span class="ic">src/retrieval/dense_retriever.py</span> is the core retrieval component. It encodes the query at request time, computes cosine similarity against a pre-built FAISS index of passage embeddings, and returns the top-k passages with scores — all in under 30 ms at p99 for a 1M-passage corpus.</p>
+
+    <h3>🗺 Repo map — files involved</h3>
     <div class="file-tree">
-      <span class="ft-dir">experiment/churn_interaction_features/</span>
-      <span class="ft-indent"><span class="ft-file">configs/experiment.yaml</span> <span style="color:#6c6762">← all params live here</span></span>
-      <span class="ft-indent"><span class="ft-file">src/config_loader.py</span> &nbsp;&nbsp;<span style="color:#6c6762">← load + validate</span></span>
-      <span class="ft-indent"><span class="ft-file">src/data_loader.py</span> &nbsp;&nbsp;&nbsp;<span style="color:#6c6762">← consumes cfg.data.*</span></span>
-      <span class="ft-indent"><span class="ft-file">tests/test_config.py</span> &nbsp;<span style="color:#6c6762">← schema assertions</span></span>
+      <span class="ft-dir">src/retrieval/</span>
+      <span class="ft-indent"><span class="ft-file">dense_retriever.py</span> &nbsp;&nbsp;<span style="color:#6c6762">← DenseRetriever.retrieve() — main entry point</span></span>
+      <span class="ft-dir">src/encoders/</span>
+      <span class="ft-indent"><span class="ft-file">query_encoder.py</span> &nbsp;&nbsp;&nbsp;<span style="color:#6c6762">← QueryEncoder.encode(text) → np.ndarray (d=768)</span></span>
+      <span class="ft-indent"><span class="ft-file">passage_encoder.py</span> &nbsp;<span style="color:#6c6762">← PassageEncoder.encode_batch() — run offline</span></span>
+      <span class="ft-dir">src/index/</span>
+      <span class="ft-indent"><span class="ft-file">faiss_index.py</span> &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6c6762">← FaissIndex.search(q_emb, k) → (scores, ids)</span></span>
+      <span class="ft-indent"><span class="ft-file">build_index.py</span> &nbsp;&nbsp;&nbsp;<span style="color:#6c6762">← offline script: encodes corpus, builds IndexFlatIP</span></span>
+      <span class="ft-dir">data/</span>
+      <span class="ft-indent"><span class="ft-file">passages.jsonl</span> &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6c6762">← {"id": "p001", "text": "...", "title": "..."}</span></span>
+      <span class="ft-indent"><span class="ft-file">index/embeddings.npy</span> <span style="color:#6c6762">← shape (1_000_000, 768), float32</span></span>
+      <span class="ft-dir">tests/</span>
+      <span class="ft-indent"><span class="ft-file">test_dense_retriever.py</span> <span style="color:#6c6762">← fixture: 5-passage mini-corpus</span></span>
+      <span class="ft-indent"><span class="ft-file">fixtures/mini_index.npy</span> <span style="color:#6c6762">← pre-computed embeddings for 5 passages</span></span>
+      <span class="ft-dir">configs/</span>
+      <span class="ft-indent"><span class="ft-file">retrieval.yaml</span> &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6c6762">← model_name, top_k, score_threshold, index_path</span></span>
     </div>
-    <h3>⚙️ How it flows</h3>
+
+    <h3>⚙️ End-to-end retrieval pipeline</h3>
     <div class="steps">
-      <div class="step"><div class="step-n">1</div><div><span class="ic">config_loader.load("configs/experiment.yaml")</span> — reads YAML, resolves paths relative to repo root, raises <span class="ic">ConfigError</span> on missing required keys.</div></div>
-      <div class="step"><div class="step-n">2</div><div>Each module receives <span class="ic">cfg</span> as a typed dataclass. No module reads the YAML file directly — all params flow through the validated object.</div></div>
-      <div class="step"><div class="step-n">3</div><div>At run start, the full config is serialised to <span class="ic">results/run_config.json</span> so any result is reproducible from that snapshot.</div></div>
+      <div class="step"><div class="step-n">1</div><div><strong>Query encoding (online).</strong> <span class="ic">QueryEncoder.encode(query)</span> passes the text through a bi-encoder (sentence-transformers/msmarco-distilbert-base-v3), mean-pools the last hidden state, and L2-normalises the result → vector in ℝ^768. L2 norm = 1 means inner product equals cosine similarity.</div></div>
+      <div class="step"><div class="step-n">2</div><div><strong>FAISS search (online).</strong> <span class="ic">FaissIndex.search(q_emb, k=10)</span> calls <span class="ic">IndexFlatIP.search</span> — exact inner product over all 1M normalised embeddings. Returns <span class="ic">(scores, ids)</span> both of shape (1, k). Because embeddings are normalised, inner product = cosine similarity ∈ [−1, 1].</div></div>
+      <div class="step"><div class="step-n">3</div><div><strong>Score filtering.</strong> <span class="ic">DenseRetriever.retrieve()</span> drops results below <span class="ic">cfg.score_threshold</span> (default 0.60 from <span class="ic">configs/retrieval.yaml</span>). The repo's <span class="ic">tests/test_dense_retriever.py:L47</span> asserts that the top result for a known query always exceeds 0.72.</div></div>
+      <div class="step"><div class="step-n">4</div><div><strong>Passage hydration.</strong> IDs are looked up in <span class="ic">passages.jsonl</span> via a pre-built offset map (<span class="ic">src/index/passage_store.py</span>) — O(1) seek, not a linear scan. Returns <span class="ic">List[RetrievalResult]</span> with id, text, title, score.</div></div>
     </div>
-    <h3>📋 Data example (experiment.yaml)</h3>
-    <pre><code><span class="cm"># configs/experiment.yaml</span>
-<span class="nb">experiment</span>: churn_interaction_features
-<span class="nb">seed</span>: 42
-<span class="nb">data</span>:
-  <span class="nb">source</span>: <span class="str">data/raw/q2_customers.parquet</span>
-  <span class="nb">val_split</span>: 0.2         <span class="cm"># validated: must be in (0, 1)</span>
-<span class="nb">features</span>:
-  <span class="nb">use_interactions</span>: <span class="kw">true</span>
-<span class="nb">model</span>:
-  <span class="nb">type</span>: logistic_regression
-  <span class="nb">C</span>: 1.0                  <span class="cm"># validated: must be > 0</span></code></pre>
-    <h3>🧪 Standalone test</h3>
-    <pre><code><span class="cm"># From repo root — isolates config validation</span>
-<span class="kw">from</span> <span class="fn">src.config_loader</span> <span class="kw">import</span> load
-cfg = <span class="fn">load</span>(<span class="str">"configs/experiment.yaml"</span>)
-<span class="kw">assert</span> cfg.seed == 42
-<span class="kw">assert</span> 0 < cfg.data.val_split < 1
-<span class="fn">print</span>(cfg)  <span class="cm"># inspect full validated object</span></code></pre>
-    <p style="margin-top:8px;font-size:12.5px;color:var(--text-muted)"><strong>Design role:</strong> Centralising params here means changing a hyperparameter never touches model code — only the YAML changes, the log captures it, and the result is reproducible.</p>
+
+    <h3>📐 Formula card — cosine similarity via inner product</h3>
+    <div class="file-tree" style="font-family:inherit;font-size:12.5px;line-height:1.9">
+      <strong>Name:</strong> Normalised inner product (= cosine similarity)<br>
+      <strong>Purpose:</strong> Rank passages by semantic relevance to the query.<br><br>
+      <strong>Math:</strong> &nbsp;score(q, p) = ê_q · ê_p &nbsp;where ê = e / ||e||₂<br>
+      <strong>Plain:</strong> &nbsp;score = dot(l2_norm(query_emb), l2_norm(passage_emb))<br><br>
+      <strong>Repo mapping:</strong><br>
+      &nbsp;&nbsp;ê_q &nbsp;← QueryEncoder.encode(text) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[L2-normed inside encode()]<br>
+      &nbsp;&nbsp;ê_p &nbsp;← embeddings.npy row[passage_id]&nbsp;[normed at index build time]<br>
+      &nbsp;&nbsp;dot &nbsp;← IndexFlatIP.search() &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[FAISS inner product kernel]<br><br>
+      <strong>Numeric example</strong> (d=4 for readability):<br>
+      &nbsp;&nbsp;q_raw = [3, 0, 4, 0] → norm=5 → ê_q = [0.6, 0.0, 0.8, 0.0]<br>
+      &nbsp;&nbsp;p1 &nbsp;&nbsp; = [0.6, 0.0, 0.8, 0.0] &nbsp;→ score = 0.36+0+0.64+0 = <strong>1.00</strong> (identical)<br>
+      &nbsp;&nbsp;p2 &nbsp;&nbsp; = [0.0, 1.0, 0.0, 0.0] &nbsp;→ score = 0+0+0+0 = <strong>0.00</strong> (orthogonal)<br>
+      &nbsp;&nbsp;p3 &nbsp;&nbsp; = [0.5, 0.1, 0.7, 0.2] (normed) → score = 0.3+0+0.56+0 = <strong>0.86</strong> (close)<br><br>
+      <strong>Sensitivity:</strong> score is bounded ∈ [−1, 1]. Threshold 0.60 (set in retrieval.yaml) cuts ~40% of candidates in empirical runs on the dev set (see <span style="color:#60a5fa">results/threshold_ablation.csv</span>).<br>
+      <strong>Common misread:</strong> IndexFlatIP computes inner product, NOT L2 distance. Only correct when both vectors are L2-normalised — which this repo guarantees. If you load raw (un-normed) embeddings into a FlatIP index, scores become meaningless.
+    </div>
+
+    <h3>📋 Representative data — mini fixture (tests/fixtures/mini_index.npy)</h3>
+    <pre><code><span class="cm"># 5 passages, d=768. Inspect first 4 dims + norm:</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+embs = np.<span class="fn">load</span>(<span class="str">"tests/fixtures/mini_index.npy"</span>)  <span class="cm"># (5, 768)</span>
+<span class="fn">print</span>(embs.shape)   <span class="cm"># (5, 768)</span>
+<span class="fn">print</span>(np.<span class="fn">linalg</span>.norm(embs, axis=1))
+<span class="cm"># [1.0, 1.0, 1.0, 1.0, 1.0]  ← all L2-normed at build time</span>
+<span class="fn">print</span>(embs[0, :4])  <span class="cm"># [ 0.023 -0.041  0.118  0.074]</span>
+
+<span class="cm"># passages.jsonl line 0:</span>
+<span class="cm"># {"id":"p000","title":"Gradient descent","text":"Gradient descent is an ..."}</span></code></pre>
+
+    <h3>🧪 Standalone test — verify retrieval end-to-end</h3>
+    <pre><code><span class="cm"># pytest tests/test_dense_retriever.py::test_retrieve_top1</span>
+<span class="cm"># — or run directly:</span>
+<span class="kw">from</span> <span class="fn">src.retrieval.dense_retriever</span> <span class="kw">import</span> DenseRetriever
+
+retriever = DenseRetriever.<span class="fn">from_config</span>(<span class="str">"configs/retrieval.yaml"</span>,
+                                        index_path=<span class="str">"tests/fixtures/mini_index.npy"</span>,
+                                        passages_path=<span class="str">"tests/fixtures/mini_passages.jsonl"</span>)
+
+results = retriever.<span class="fn">retrieve</span>(<span class="str">"what is gradient descent?"</span>, top_k=3)
+
+<span class="kw">assert</span> len(results) &lt;= 3
+<span class="kw">assert</span> results[0].score &gt; 0.70,     <span class="cm">f"top score too low: {results[0].score}"</span>
+<span class="kw">assert</span> <span class="str">"gradient"</span> <span class="kw">in</span> results[0].text.lower()
+<span class="kw">assert</span> all(r.score &gt;= retriever.cfg.score_threshold <span class="kw">for</span> r <span class="kw">in</span> results)
+<span class="cm"># Expected: results[0].id == "p000", score ≈ 0.91</span></code></pre>
+
+    <h3>🏗 Design role and failure modes</h3>
+    <div class="steps">
+      <div class="step"><div class="step-n">✓</div><div><strong>Why offline encoding scales.</strong> All 1M passage embeddings are pre-computed by <span class="ic">build_index.py</span> (runs once, ~4 h on a single A100). At query time, only the query is encoded (~12 ms). Retrieval is O(d·k) via FAISS — not O(n·d). Adding passages requires a re-index, not a model change.</div></div>
+      <div class="step"><div class="step-n">✓</div><div><strong>Bi-encoder vs cross-encoder tradeoff.</strong> The repo uses bi-encoder here for speed. Cross-encoders (e.g., a reranker in <span class="ic">src/reranking/cross_encoder.py</span>) attend jointly over query+passage and score more accurately — but run in O(n) forward passes. The pipeline chains both: dense retrieval (top-100) → cross-encoder rerank (top-10).</div></div>
+      <div class="step"><div class="step-n">✗</div><div><strong>Failure: corpus drift.</strong> If new passages use domain language the encoder was not trained on, cosine scores are miscalibrated — a score of 0.80 may not mean "relevant." The repo tracks this via <span class="ic">scripts/monitor_score_distribution.py</span>, which alerts when the p50 score of top-1 results drops below 0.75 in production logs.</div></div>
+      <div class="step"><div class="step-n">✗</div><div><strong>Failure: index/encoder mismatch.</strong> If you update the encoder checkpoint but rebuild the index with the old one, scores become nonsense — the query and passage spaces are no longer aligned. The repo prevents this by storing a <span class="ic">model_sha256</span> in <span class="ic">data/index/index_meta.json</span> and asserting it matches the loaded encoder at startup.</div></div>
+    </div>
   </div>`;
 }
 
