@@ -1,3 +1,12 @@
+---
+title: Agentic Skills
+emoji: 🎯
+colorFrom: orange
+colorTo: purple
+sdk: static
+pinned: false
+---
+
 # Agentic Skills
 
 > Plug-and-play skill definitions that turn any AI coding assistant into a domain-aware specialist. Each skill is a `SKILL.md` file — drop it into your assistant's skills directory, invoke it with `$skill-name`, and your assistant adopts that skill's operating rules, patterns, and quality checklists.
