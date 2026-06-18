@@ -1,7 +1,7 @@
 ---
 title: Agentic Skills
 emoji: 🎯
-colorFrom: orange
+colorFrom: red
 colorTo: purple
 sdk: static
 pinned: false
