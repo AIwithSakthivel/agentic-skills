@@ -31,7 +31,7 @@ pinned: false
 A skill is a `SKILL.md` file that defines how your AI assistant should approach a domain. When you prefix a prompt with `$skill-name`, the assistant loads the skill's context — its operating rules, patterns, and quality checklist — before responding.
 
 ```
-$concept-tutor Teach me cross-entropy loss — intuition, formula, derivation, and self-check
+$concept-tutor Teach me cross-entropy loss
 ```
 
 The assistant responds as a focused research science tutor, applying the lesson structure, formula card pattern, research reference rules, and self-assessment gate from that skill.
@@ -62,7 +62,7 @@ cp -r agentic-skills/repo-concept-explainer ~/.your-assistant/skills/
 ```bash
 $frontend-skill         Build a modal dialog with focus trap and keyboard dismiss
 $sci-experiment         Set up an experiment to test whether feature X improves AUC on this dataset
-$concept-tutor          Teach me the attention mechanism — intuition, formula, and research trail
+$concept-tutor          Teach me attention mechanisms
 $repo-concept-explainer Explain how embedding similarity is computed in this repo
 ```
 
