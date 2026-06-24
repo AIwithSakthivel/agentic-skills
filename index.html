@@ -151,6 +151,7 @@
     .icon-science   { background: #0f3a28; }
     .icon-tutor     { background: #2d1a58; }
     .icon-repo      { background: #3a1a1a; }
+    .icon-pycomment { background: #26380e; }
 
     .skill-meta { flex: 1; min-width: 0; }
 
@@ -872,6 +873,15 @@
       <span class="skill-arrow">›</span>
     </div>
 
+    <div class="skill-item" id="sb-pycomment" onclick="selectSkill('pycomment')">
+      <div class="skill-icon icon-pycomment">📝</div>
+      <div class="skill-meta">
+        <div class="skill-name">python-comment-helper</div>
+        <div class="skill-desc">Docstrings &amp; useful comments</div>
+      </div>
+      <span class="skill-arrow">›</span>
+    </div>
+
     <div class="add-btn">
       <span style="font-size:17px;line-height:1">+</span>
       <span>Add skill</span>
@@ -925,6 +935,7 @@
       <div class="pill" onclick="selectSkill('science')">🔬 sci-experiment</div>
       <div class="pill" onclick="selectSkill('tutor')">🎓 concept-tutor</div>
       <div class="pill" onclick="selectSkill('repo')">🗂 repo-concept-explainer</div>
+      <div class="pill" onclick="selectSkill('pycomment')">📝 python-comment-helper</div>
     </div>
   </div>
 
@@ -1012,6 +1023,18 @@ const SKILLS = {
     userMsg: 'Explain how dense retrieval scoring works in this repo — trace the full pipeline from query to score, map the cosine similarity formula to the implementation, walk through a real data example with vectors, and give me a standalone pytest I can run right now.',
     response: buildRepoResponse(),
     panelContent: buildRepoPanel(),
+  },
+  pycomment: {
+    label: 'python-comment-helper',
+    icon: '📝',
+    iconClass: 'icon-pycomment',
+    tagline: 'Shipping-quality Python documentation — Google-style docstrings, useful comments, anti-invention',
+    description: 'Performs a documentation pass on Python code. Adds module, class, and function docstrings in Google style. Adds inline comments only for non-obvious intent, tradeoffs, or safety constraints. Removes noise and never invents behavior not supported by the code.',
+    tags: ['Python', 'Docstrings', 'Google Style', 'Module Docs', 'Code Review', 'Inline Comments', 'Anti-invention', 'Shipping Quality'],
+    invoke: '$python-comment-helper',
+    userMsg: 'Add Google-style docstrings and useful inline comments to this Python retry HTTP client — it uses exponential backoff with jitter. Prepare it for code review.',
+    response: buildPyCommentResponse(),
+    panelContent: buildPyCommentPanel(),
   }
 };
 
@@ -1541,6 +1564,156 @@ results = retriever.<span class="fn">retrieve</span>(<span class="str">"what is 
       <div class="step"><div class="step-n">✗</div><div><strong>Failure: index/encoder mismatch.</strong> If you update the encoder checkpoint but rebuild the index with the old one, scores become nonsense — the query and passage spaces are no longer aligned. The repo prevents this by storing a <span class="ic">model_sha256</span> in <span class="ic">data/index/index_meta.json</span> and asserting it matches the loaded encoder at startup.</div></div>
     </div>
   </div>`;
+}
+
+function buildPyCommentResponse() {
+  return `<div class="rt">
+    <div class="skill-active-badge">📝 python-comment-helper active</div>
+    <p>Documentation pass complete. Added a module docstring, class docstring with attributes, and method docstrings where behavior, contracts, or side effects matter. Skipped <span class="ic">_should_retry</span> — it's a one-liner whose name and set literal are self-explanatory. Inline comments added only where the logic is non-obvious.</p>
+
+    <h3>📄 Module + class docstring</h3>
+    <pre><code><span class="cm">"""HTTP client with exponential-backoff retry logic.
+
+Wraps requests.Session to add per-request retry handling with a
+configurable delay ceiling and optional jitter. Designed for
+single-host endpoints. Not thread-safe: use one instance per
+thread or wrap access with external locking.
+"""</span>
+
+<span class="kw">class</span> <span class="fn">RetryClient</span>:
+    <span class="cm">"""HTTP client that retries transient failures with exponential backoff.
+
+    Attributes:
+        base_url: Root URL prepended to every request path.
+        max_retries: Maximum retry attempts after the first failure.
+        base_delay: Initial sleep duration in seconds before the first retry.
+        max_delay: Upper bound on computed delay before jitter is applied.
+        jitter: If True, multiplies computed delay by uniform(0.5, 1.5)
+            to spread concurrent callers after a service disruption.
+    """</span></code></pre>
+
+    <h3>⚙️ _calc_delay — non-obvious intent documented</h3>
+    <pre><code>    <span class="kw">def</span> <span class="fn">_calc_delay</span>(self, attempt: <span class="fn">int</span>) -> <span class="fn">float</span>:
+        <span class="cm">"""Returns sleep duration in seconds before the next retry attempt.
+
+        Applies exponential backoff capped at max_delay, then optionally
+        adds multiplicative jitter. Jitter prevents thundering-herd collisions
+        when many callers retry concurrently after a transient outage.
+
+        Args:
+            attempt: Zero-indexed retry attempt number.
+
+        Returns:
+            Sleep duration in seconds, always positive.
+        """</span>
+        delay = <span class="fn">min</span>(self.base_delay * (2 ** attempt), self.max_delay)
+        <span class="cm"># Randomise within [0.5x, 1.5x] so concurrent callers don't all resume
+        # at the same instant and re-spike the recovering service.</span>
+        <span class="kw">if</span> self.jitter:
+            delay *= random.<span class="fn">uniform</span>(0.5, 1.5)
+        <span class="kw">return</span> delay</code></pre>
+
+    <h3>🌐 get — full contract documented</h3>
+    <pre><code>    <span class="kw">def</span> <span class="fn">get</span>(self, path: <span class="fn">str</span>, params=<span class="kw">None</span>, headers=<span class="kw">None</span>) -> requests.Response:
+        <span class="cm">"""Sends a GET request, retrying on transient server errors.
+
+        Retries on status codes 429, 500, 502, 503, and 504 up to
+        max_retries times. Does not retry on other 4xx client errors.
+        Between retries, sleeps for _calc_delay(attempt) seconds.
+
+        Args:
+            path: URL path appended to base_url. Leading slash is normalised.
+            params: Query parameters forwarded to requests.Session.get.
+            headers: Additional HTTP headers for this request only.
+
+        Returns:
+            The response from the first successful or non-retryable attempt.
+
+        Raises:
+            requests.Timeout: If all attempts time out (timeout=10 s each).
+            requests.ConnectionError: If all attempts fail to connect.
+        """</span>
+        url = self.base_url.<span class="fn">rstrip</span>(<span class="str">'/'</span>) + <span class="str">'/'</span> + path.<span class="fn">lstrip</span>(<span class="str">'/'</span>)
+        last_exc = <span class="kw">None</span>
+        <span class="kw">for</span> attempt <span class="kw">in</span> <span class="fn">range</span>(self.max_retries + 1):
+            <span class="kw">try</span>:
+                resp = self._session.<span class="fn">get</span>(url, params=params, headers=headers, timeout=10)
+                <span class="kw">if</span> resp.ok <span class="kw">or not</span> self.<span class="fn">_should_retry</span>(resp.status_code):
+                    <span class="kw">return</span> resp
+                <span class="kw">if</span> attempt &lt; self.max_retries:
+                    time.<span class="fn">sleep</span>(self.<span class="fn">_calc_delay</span>(attempt))
+            <span class="kw">except</span> (requests.Timeout, requests.ConnectionError) <span class="kw">as</span> e:
+                last_exc = e
+                <span class="kw">if</span> attempt &lt; self.max_retries:
+                    time.<span class="fn">sleep</span>(self.<span class="fn">_calc_delay</span>(attempt))
+        <span class="cm"># Raise the last network exception rather than returning a failed
+        # response — callers should not have to check for None or a bad status.</span>
+        <span class="kw">if</span> last_exc:
+            <span class="kw">raise</span> last_exc
+        <span class="kw">return</span> resp</code></pre>
+
+    <h3>✅ Documentation pass summary</h3>
+    <div class="steps">
+      <div class="step"><div class="step-n">✓</div><div>Added module docstring: responsibility, scope, and thread-safety constraint (evident from shared <span class="ic">self._session</span>); no invented deployment or production guarantees.</div></div>
+      <div class="step"><div class="step-n">✓</div><div>Added class docstring with all five public attributes; documented <span class="ic">jitter</span> range precisely as <span class="ic">uniform(0.5, 1.5)</span> — matching the code — not as a vague "random factor."</div></div>
+      <div class="step"><div class="step-n">✓</div><div>Documented <span class="ic">_calc_delay</span>: non-obvious because exponential backoff with multiplicative jitter has a specific thundering-herd purpose not apparent from the arithmetic alone.</div></div>
+      <div class="step"><div class="step-n">—</div><div>Skipped <span class="ic">_should_retry</span>: one line, self-explanatory name, the set literal <span class="ic">{429, 500, 502, 503, 504}</span> is the documentation. A docstring would only restate the code.</div></div>
+      <div class="step"><div class="step-n">✓</div><div>Documented <span class="ic">get</span> with Args, Returns, and Raises; retry status codes listed are exactly those checked by <span class="ic">_should_retry</span> — no more, no invented contracts.</div></div>
+      <div class="step"><div class="step-n">✓</div><div>Inline comments explain <em>why</em> jitter is randomised and why the last exception is raised instead of returning — not what the next line does.</div></div>
+    </div>
+  </div>`;
+}
+
+function buildPyCommentPanel() {
+  return `
+    <div class="panel-section">
+      <h4>Description</h4>
+      <p>Performs a shipping-quality documentation pass on Python code. Adds Google-style module, class, and function docstrings where they matter. Adds inline comments only for non-obvious intent, tradeoffs, or safety constraints. Removes or flags comments that only restate code. Never invents behavior or guarantees not supported by the code.</p>
+    </div>
+    <div class="panel-section">
+      <h4>Capabilities</h4>
+      <div class="tag-list">
+        <span class="tag">Module docstrings</span>
+        <span class="tag">Class docstrings</span>
+        <span class="tag">Google style</span>
+        <span class="tag">Args / Returns / Raises</span>
+        <span class="tag">Inline comments</span>
+        <span class="tag">Anti-invention</span>
+        <span class="tag">Noise removal</span>
+        <span class="tag">Code review prep</span>
+      </div>
+    </div>
+    <div class="panel-section">
+      <h4>Documentation standard</h4>
+      <div class="invoke-box" style="line-height:1.9">
+        Module: responsibility + scope<br>
+        Class: what it represents + attributes<br>
+        Function: behavior · Args · Returns · Raises<br>
+        Skip: tiny helpers where name explains all<br>
+        Inline: intent · tradeoffs · workarounds · safety<br>
+        Never: restate code · invent guarantees
+      </div>
+    </div>
+    <div class="panel-section">
+      <h4>Invoke</h4>
+      <div class="invoke-box">
+        <span class="invoke-comment"># In any AI coding assistant prompt:</span><br>
+        $python-comment-helper Add Google-style<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;docstrings to auth.py<br><br>
+        $python-comment-helper Prepare this module<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for code review
+      </div>
+    </div>
+    <div class="panel-section">
+      <h4>Typical requests</h4>
+      <ul style="font-size:13.5px;color:var(--text-secondary);padding-left:18px;line-height:1.7">
+        <li>Add or revise module, class, and function docstrings</li>
+        <li>Convert comments to Google style for a PR</li>
+        <li>Remove redundant comments that only restate code</li>
+        <li>Document side effects, edge cases, and safety constraints</li>
+        <li>Prepare source, utility, or service files for code review</li>
+      </ul>
+    </div>`;
 }
 
 function buildRepoPanel() {

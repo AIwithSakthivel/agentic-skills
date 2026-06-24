@@ -23,6 +23,7 @@ pinned: false
 | [sci-experiment](./sci-experiment/SKILL.md) | Scientific experiment structure — hypothesis-first, reproducible, with configs, notebooks, src modules, baselines, and research documentation | `$sci-experiment` |
 | [concept-tutor](./concept-tutor/SKILL.md) | Research-grounded science tutor — intuition to formalism, readable formula cards, derivations, paper references, enterprise tradeoffs, and self-assessment for data scientists and ML practitioners | `$concept-tutor` |
 | [repo-concept-explainer](./repo-concept-explainer/SKILL.md) | Repository-grounded concept explainer — traces implementation, data, tests, and architecture to explain what a concept means inside a specific codebase, with formulas, standalone examples, and design context | `$repo-concept-explainer` |
+| [python-comment-helper](./python-comment-helper/SKILL.md) | Shipping-quality Python documentation pass — Google-style module, class, and function docstrings, useful inline comments, noise removal, and anti-invention discipline for code review | `$python-comment-helper` |
 
 ---
 
@@ -51,19 +52,21 @@ git clone https://github.com/AIwithSakthivel/agentic-skills.git
 ### 2. Copy skills into your assistant's skills directory
 
 ```bash
-cp -r agentic-skills/frontend-skill       ~/.your-assistant/skills/
-cp -r agentic-skills/sci-experiment       ~/.your-assistant/skills/
-cp -r agentic-skills/concept-tutor        ~/.your-assistant/skills/
-cp -r agentic-skills/repo-concept-explainer ~/.your-assistant/skills/
+cp -r agentic-skills/frontend-skill           ~/.your-assistant/skills/
+cp -r agentic-skills/sci-experiment           ~/.your-assistant/skills/
+cp -r agentic-skills/concept-tutor            ~/.your-assistant/skills/
+cp -r agentic-skills/repo-concept-explainer   ~/.your-assistant/skills/
+cp -r agentic-skills/python-comment-helper    ~/.your-assistant/skills/
 ```
 
 ### 3. Invoke in any prompt
 
 ```bash
-$frontend-skill         Build a modal dialog with focus trap and keyboard dismiss
-$sci-experiment         Set up an experiment to test whether feature X improves AUC on this dataset
-$concept-tutor          Teach me attention mechanisms
-$repo-concept-explainer Explain how embedding similarity is computed in this repo
+$frontend-skill           Build a modal dialog with focus trap and keyboard dismiss
+$sci-experiment           Set up an experiment to test whether feature X improves AUC on this dataset
+$concept-tutor            Teach me attention mechanisms
+$repo-concept-explainer   Explain how embedding similarity is computed in this repo
+$python-comment-helper    Add Google-style docstrings and prepare this module for code review
 ```
 
 ---
@@ -138,6 +141,25 @@ Explains technical concepts grounded in the actual repository under analysis —
 
 ---
 
+### `python-comment-helper`
+
+Performs a shipping-quality documentation pass on Python code. Adds Google-style docstrings at module, class, and function level where they matter. Adds inline comments only for non-obvious intent, tradeoffs, workarounds, or safety constraints. Removes noise and never invents behavior or guarantees not supported by the code.
+
+**Covers:**
+- Module docstrings explaining file responsibility and scope
+- Class docstrings with `Attributes` section for public and non-obvious internal classes
+- Function and method docstrings with `Args`, `Returns`, and `Raises` sections when they add value
+- Skip heuristic — omits docstrings for tiny private helpers when name and type hints are self-explanatory
+- Inline comments explaining the _why_: intent, tradeoffs, workarounds, security assumptions, compatibility constraints, performance choices
+- Anti-invention discipline — never documents behavior, guarantees, or business intent not supported by the code
+- Documentation pass summary after revising a file
+
+**Use when:** commenting Python code, preparing a module for code review, converting comments to Google style, cleaning up noisy comments, or documenting source, helper, utility, service, or library files.
+
+**Invoke:** `$python-comment-helper <your request>`
+
+---
+
 ## Demo UI
 
 The [live demo](https://aiwithsakthivel.github.io/agentic-skills/) is a static single-page app (`index.html`) that shows each skill handling a realistic request with an animated response. No build step — just open in a browser.
@@ -174,7 +196,10 @@ agentic-skills/
 ├── concept-tutor/
 │   ├── SKILL.md
 │   └── agents/openai.yaml
-└── repo-concept-explainer/
+├── repo-concept-explainer/
+│   ├── SKILL.md
+│   └── agents/openai.yaml
+└── python-comment-helper/
     ├── SKILL.md
     └── agents/openai.yaml
 ```

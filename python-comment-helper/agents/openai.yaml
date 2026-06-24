@@ -1,0 +1,4 @@
+interface:
+  display_name: "Python Comment Helper"
+  short_description: "Improve Python comments and docstrings with a shipping-quality documentation pass."
+  default_prompt: "Use $python-comment-helper to add Google-style docstrings and useful inline comments to this Python code — module, class, and function level — while removing noise and avoiding invented behavior."
