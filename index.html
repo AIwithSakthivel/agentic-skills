@@ -1032,7 +1032,7 @@ const SKILLS = {
     description: 'Performs a documentation pass on Python code. Adds module, class, and function docstrings in Google style. Adds inline comments only for non-obvious intent, tradeoffs, or safety constraints. Removes noise and never invents behavior not supported by the code.',
     tags: ['Python', 'Docstrings', 'Google Style', 'Module Docs', 'Code Review', 'Inline Comments', 'Anti-invention', 'Shipping Quality'],
     invoke: '$python-comment-helper',
-    userMsg: 'Add Google-style docstrings and useful inline comments to this Python retry HTTP client — it uses exponential backoff with jitter. Prepare it for code review.',
+    userMsg: 'Comment my Python code',
     response: buildPyCommentResponse(),
     panelContent: buildPyCommentPanel(),
   }
