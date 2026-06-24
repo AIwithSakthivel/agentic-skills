@@ -56,9 +56,68 @@ For public functions and methods, document the useful contract:
 - Important arguments when their role is not obvious.
 - The return value when meaningful.
 - Special branches such as empty input, fallbacks, skipped work, mutation, retries, external calls, caching, lazy imports, or error paths.
-- Side effects such as file writes, network calls, state mutation, logging, environment-variable reads, or LLM/tool calls.
+- Side effects such as file writes, network calls, state mutation, logging, environment-variable reads, or LLM/tool calls. When a function mutates multiple external objects in place (e.g. both a result object and a state object), name the mutations explicitly in the docstring even if the summary line is a one-liner — a reader must not have to read the body to discover that external state changed.
 
 If a function has a meaningful branch, document the branch. For example, if empty input avoids state mutation or external calls, say that in the docstring rather than only adding an inline comment.
+
+### Dict returns, string enums, and mutation side effects
+
+These three patterns are the most common places where a one-liner is insufficient but a naive pass will leave sections out.
+
+**Dict returns with domain-specific keys** — `-> dict` in the type hint tells a reader nothing about the keys. Always add a `Returns:` section that lists the keys.
+
+Bad:
+```python
+def run_job(name: str, config: dict) -> dict:
+    """Runs the named job and returns execution metadata."""
+```
+
+Better:
+```python
+def run_job(name: str, config: dict) -> dict:
+    """Runs the named job and returns execution metadata.
+
+    Returns:
+        Dict with keys: job_id, status, start_time, end_time,
+        output_path, error_message.
+    """
+```
+
+**String enum parameters with a ValueError** — when a function raises `ValueError` to enforce valid string choices, that exception IS the documentation of the input contract. Always surface it in `Raises:`.
+
+Bad:
+```python
+def export(data: list, fmt: str) -> bytes:
+    """Exports data in the requested format."""
+```
+
+Better:
+```python
+def export(data: list, fmt: str) -> bytes:
+    """Exports data in the requested format.
+
+    Raises:
+        ValueError: If fmt is not one of: json, csv, parquet.
+    """
+```
+
+**Multiple external mutations** — when a function mutates more than one external object in place, the one-liner cannot carry the full side-effect contract. Name the mutated objects explicitly.
+
+Bad:
+```python
+def close_session(session, registry) -> None:
+    """Closes the session and removes it from the registry."""
+```
+
+Better:
+```python
+def close_session(session, registry) -> None:
+    """Closes the session and removes it from the registry.
+
+    Mutates session.status to "closed" and removes the session
+    entry from registry in place.
+    """
+```
 
 ### Name the mechanism, not just the outcome
 
@@ -173,11 +232,18 @@ def get_port(env_var: str = "REDWOOD_DEMO_PORT", default: int = 8788) -> int:
 
 Only include sections that are actually useful. Do not add empty or redundant `Args`, `Returns`, or `Raises` sections.
 
-Add `Args` when a parameter's role is not obvious from its name and type hint alone — not simply because the function has multiple parameters or optional behavior.
+Add `Args` when a parameter's role is not obvious from its name and type hint alone — not simply because the function has multiple parameters or optional behavior. Always add `Args` for untyped parameters (e.g. bare `llm`) where the expected interface is not inferable, and for string parameters that accept only specific values (string enums).
 
-Prefer `Returns` when the returned value is not obvious, has special conditions, or is a rich object.
+Add `Returns` when any of these are true:
+- The return type is `dict` and the keys are domain-specific (a reader cannot know the key names from the signature alone).
+- The return type is a typed schema, dataclass, or named tuple whose relevant fields are not obvious.
+- There is a special-case return: early `None`, an empty-string sentinel, a fallback value, or a non-mutating short-circuit.
+- The return type hint alone (`-> dict`, `-> list`, `-> str`) does not tell a reader what to expect from the value.
 
-Prefer `Raises` only for exceptions that are explicit in the code or reliably implied by operations the function intentionally performs. Do not invent domain-specific exceptions.
+Add `Raises` when:
+- A `ValueError` or similar exception documents valid string choices for a parameter — this is the primary documentation of the valid input set, not an implementation detail.
+- An exception is explicitly raised or reliably implied by an operation the function intentionally performs.
+Do not invent exceptions that the code does not raise.
 
 ## Module Docstrings
 
