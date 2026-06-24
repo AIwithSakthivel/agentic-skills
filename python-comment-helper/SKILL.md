@@ -1,6 +1,6 @@
 ---
 name: python-comment-helper
-description: improve python comments and docstrings through a shipping-quality documentation pass. use when the user asks to comment python code, add or revise module/class/function/method docstrings, clean up noisy comments, prepare code comments for codex or code review, convert comments to google style, or document source, helper, utility, service, or library files. focuses on useful documentation that explains intent, contracts, side effects, edge cases, and constraints while avoiding invented behavior or comments that restate code.
+description: improve python comments and docstrings through a shipping-quality documentation pass. use when the user asks to comment python code, add or revise module/class/function/method docstrings, clean up noisy comments, prepare code comments for codex or code review, convert comments to google style, or document source, helper, utility, service, or library files. focuses on code-grounded documentation that explains intent, contracts, side effects, edge cases, and constraints while avoiding invented behavior, filler docstrings, and comments that restate code.
 ---
 
 # Python Comment Helper
@@ -9,17 +9,19 @@ description: improve python comments and docstrings through a shipping-quality d
 
 Perform a shipping-quality documentation pass for Python code. Generic tools add comments; this skill improves documentation quality by adding only useful Google-style docstrings and comments, removing or avoiding noise, preserving behavior, and making unsupported assumptions explicit.
 
-Use docstrings to document APIs. Use comments to explain intent. Avoid comments that simply restate code.
+Use docstrings to document APIs. Use comments to explain intent. Avoid comments that simply restate code. Prefer clear, code-grounded documentation over polished but vague wording.
 
 ## Default Output
+
+When the user provides Python code, edit the code directly unless they ask only for advice. Return the revised code first, then include a short documentation pass summary when useful.
 
 When reviewing or writing comments for Python code, produce:
 
 1. Revised code snippets with module, class, function, or method docstrings where appropriate.
 2. Inline or block comments only where they explain non-obvious intent, constraints, side effects, tradeoffs, safety assumptions, compatibility issues, or performance choices.
-3. A concise documentation pass summary when useful, especially after editing a full file.
+3. A concise documentation pass summary after editing a full file or meaningful snippet.
 
-Prefer editing the user's code directly over giving abstract advice when code is provided.
+Do not only add comments. Improve documentation quality by removing, replacing, or avoiding comments that are redundant, stale, vague, or unsupported by the code.
 
 ## Core Standard
 
@@ -27,14 +29,77 @@ Use this hierarchy:
 
 - Use a module docstring at the top of a shipped Python file to explain the file's responsibility and scope.
 - Use class docstrings for public classes and non-obvious internal classes.
-- Use function and method docstrings for public APIs, complex behavior, non-obvious side effects, validation, exceptions, or returned values.
+- Use function and method docstrings for public APIs, complex behavior, non-obvious side effects, validation, exceptions, returned values, or branch-specific behavior.
 - Skip docstrings for tiny private helpers when the function name and type hints are self-explanatory.
 - Use inline or block comments only for non-obvious intent, tradeoffs, workarounds, security assumptions, compatibility constraints, or performance choices.
 - Delete, avoid, or flag comments that merely translate Python into English.
 
+## Code-Grounded Documentation Rules
+
+Every docstring must be grounded in behavior visible from the code or context supplied by the user.
+
+Do not write polished but generic docstrings. Avoid vague phrases such as:
+
+- "initializes the instance"
+- "handles the request"
+- "processes the data"
+- "manages runtime configuration"
+- "validates dependencies"
+- "performs the operation"
+- "returns the result"
+
+Replace vague wording with the actual contract visible in the code: what is read, created, delegated, mutated, returned, skipped, raised, or preserved.
+
+For public functions and methods, document the useful contract:
+
+- What the function does.
+- Important arguments when their role is not obvious.
+- The return value when meaningful.
+- Special branches such as empty input, fallbacks, skipped work, mutation, retries, external calls, caching, lazy imports, or error paths.
+- Side effects such as file writes, network calls, state mutation, logging, environment-variable reads, or LLM/tool calls.
+
+If a function has a meaningful branch, document the branch. For example, if empty input avoids state mutation or external calls, say that in the docstring rather than only adding an inline comment.
+
+### Name the mechanism, not just the outcome
+
+When a function's ranking, inference, scoring, or transformation algorithm is what maintainers need to understand, name it in the summary line rather than describing only the output.
+
+Bad:
+
+```python
+"""Ranks EDUs for retrieval."""
+```
+
+Better:
+
+```python
+"""Ranks EDUs by token overlap with indexed slot-fact text."""
+"""Ranks EDUs by exact slot/entity matches and session continuity."""
+```
+
+The better versions tell a reader *how* to reason about the scores, which matters for debugging and modification.
+
+### Verb precision
+
+Choose verbs that reflect the nature of the operation, not just its output:
+
+- **Infers** — output is derived through logic or heuristics, not fetched directly.
+- **Rebuilds** — clears and repopulates state entirely, not an incremental update.
+- **Creates** — brings data structures into existence; prefer over "initializes" for `__init__` on data-holding classes.
+- **Returns** — simple reads and pure transformations.
+- **Combines** — merges inputs into a new output.
+
+The verb is often the most information-dense word in the summary line. Choose it deliberately.
+
+### Domain compression
+
+Use precise domain terms without paraphrasing them. Readers of domain code gain more from "reciprocal-rank fusion" or "sparse and symbolic retrieval" than from a prose explanation of those terms. Do not replace domain vocabulary with generic descriptions to appear accessible — that degrades precision without improving clarity.
+
 ## Anti-Invention Rule
 
-Never invent business purpose, product intent, side effects, persistence behavior, security guarantees, performance guarantees, API contracts, ownership, or operational assumptions that are not supported by the code or by user-provided context.
+Never invent business purpose, product intent, side effects, persistence behavior, security guarantees, performance guarantees, API contracts, ownership, lifecycle behavior, operational assumptions, validation, caching, idempotency, thread-safety, or storage behavior that is not supported by the code or by user-provided context.
+
+Be especially careful with words such as "validated", "secure", "safe", "optimized", "cached", "persistent", "thread-safe", "idempotent", "production-ready", "runtime configuration", and "database-safe". Use them only when the code clearly implements that behavior or the user supplies that context.
 
 When behavior is clear from code, document the actual behavior precisely. When intent is ambiguous, either use neutral wording or call out the uncertainty in the documentation pass summary instead of guessing.
 
@@ -56,9 +121,39 @@ def normalize_name(name: str) -> str:
 
 The bad version invents customer and storage intent. The better version documents only what the code does.
 
+Bad:
+
+```python
+def __init__(self, llm, loader=None) -> None:
+    """Initializes the instance with validated dependencies and runtime configuration."""
+```
+
+Better:
+
+```python
+def __init__(self, llm, loader=None) -> None:
+    """Initializes a session with the language model and API loader dependencies."""
+```
+
+The bad version invents validation and uses filler wording. The better version documents the visible dependency contract.
+
 ## Docstring Format
 
-Use Google-style docstring sections when they add value:
+Default to a single summary sentence ending with a period. Add `Args`, `Returns`, and `Raises` sections only when the summary line genuinely cannot carry the contract — not because the function has multiple parameters or returns a value. A tight one-liner is better than a padded multi-section docstring.
+
+Prefer a one-liner even for complex public methods when parameter names and type hints already convey meaning:
+
+```python
+"""Ranks EDUs by token overlap with indexed slot-fact text."""
+```
+
+Use sections when:
+
+- A parameter's role is not obvious from its name and type hint alone.
+- The return value has special conditions, a non-obvious type, or multiple outcomes.
+- An exception is reliably raised by operations the function explicitly performs.
+
+When sections are warranted, use Google style:
 
 ```python
 def get_port(env_var: str = "REDWOOD_DEMO_PORT", default: int = 8788) -> int:
@@ -78,23 +173,56 @@ def get_port(env_var: str = "REDWOOD_DEMO_PORT", default: int = 8788) -> int:
 
 Only include sections that are actually useful. Do not add empty or redundant `Args`, `Returns`, or `Raises` sections.
 
+Add `Args` when a parameter's role is not obvious from its name and type hint alone — not simply because the function has multiple parameters or optional behavior.
+
+Prefer `Returns` when the returned value is not obvious, has special conditions, or is a rich object.
+
+Prefer `Raises` only for exceptions that are explicit in the code or reliably implied by operations the function intentionally performs. Do not invent domain-specific exceptions.
+
 ## Module Docstrings
 
-For shipped files, add a top-level docstring that explains responsibility and scope:
+For shipped files, add a top-level docstring that explains responsibility and scope. Module docstrings always use multi-line format: a summary sentence on the first line, a blank line, an elaboration body, and the closing `"""` on its own line. Never compress a module docstring onto a single line.
+
+Never:
 
 ```python
-"""Local HTTP server for the Redwood DST demo UI.
+"""Indexes slot facts from episodic memories for sparse and symbolic retrieval."""
+```
 
-The server exposes static demo assets and a small JSON API backed by the local
-demo database. It is intended for local development only and binds to localhost.
+Always:
+
+```python
+"""Indexes slot facts from episodic memories for sparse and symbolic retrieval.
+
+Builds three lookup tables keyed by EDU, (slot, value) pair, and entity value,
+plus a per-fact token set for sparse BM25-style scoring. Provides sparse and
+symbolic ranking methods and a reciprocal-rank fusion utility for combining them.
 """
 ```
 
+The structure is:
+
+- **Summary line** (line 1): what the file is responsible for, ending with a period.
+- **Blank line**.
+- **Elaboration** (1–3 sentences): the key data structures, algorithms, entry points, or constraints not captured in the summary.
+- **Closing `"""`** on its own line.
+
+A module with more than ~50 lines or more than three public methods should not have a summary-only docstring. The docstring's weight should feel proportional to the complexity it represents.
+
 Avoid filename-only docstrings such as `"""server.py."""`.
+
+A good module docstring answers at least one of these:
+
+- What responsibility does this file own?
+- What larger component does it support?
+- What kind of state, IO, API, or service boundary does it coordinate?
+- What important usage constraint is visible from the code?
+
+When a module and its primary class describe overlapping concerns, differentiate by scope: the module docstring names the data source, external dependency, or broader purpose; the class docstring names the indexing unit, ownership structure, or usage entry points.
 
 ## Class Docstrings
 
-Document what the class represents and any important attributes or lifecycle behavior:
+Document what the class represents, what it owns, and what it delegates. Include important attributes or lifecycle behavior when useful.
 
 ```python
 class DemoConfig:
@@ -108,6 +236,29 @@ class DemoConfig:
 ```
 
 Do not repeat the class name in prose unless it clarifies domain meaning.
+
+For wrapper or coordinator classes, prefer describing ownership and delegation:
+
+```python
+class MultiTurnSession:
+    """Coordinates a multi-turn dialogue session.
+
+    The session owns the mutable dialogue state and delegates turn-level intent,
+    slot, and API-call tracking to `StateTracker`.
+    """
+```
+
+For index, store, registry, or cache classes whose `__init__` creates lookup structures rather than injecting dependencies, document the data structures created and their initial state — not the parameter list:
+
+```python
+def __init__(self) -> None:
+    """Creates empty lookup tables for slot facts, entities, and fact tokens."""
+```
+
+Name the categories of structures, not a generic count:
+
+- Good: `"for slot facts, entities, and fact tokens"`
+- Bad: `"with five internal dictionaries"`
 
 ## Function and Method Docstrings
 
@@ -125,6 +276,24 @@ def load(self) -> DemoConfig:
     Raises:
         FileNotFoundError: If the science module root does not exist.
         ValueError: If a configured port or path is invalid.
+    """
+```
+
+Good:
+
+```python
+def process_turn(self, utterance: str, episodic_context: str = "") -> TurnResult:
+    """Processes one user utterance against the current dialogue state.
+
+    Empty utterances return a non-mutating continuation response instead of
+    invoking the tracker or language model.
+
+    Args:
+        utterance: User input for the current turn.
+        episodic_context: Optional contextual information available for this turn.
+
+    Returns:
+        The turn result produced from the current state and utterance.
     """
 ```
 
@@ -151,6 +320,23 @@ Avoid comments that restate the next line:
 server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
 ```
 
+Use inline or block comments for:
+
+- Non-obvious decisions.
+- Workarounds.
+- Safety or security assumptions visible from code.
+- Performance tradeoffs.
+- Compatibility constraints.
+- Why behavior intentionally differs from the obvious implementation.
+
+Do not add inline comments for every branch. Prefer a function docstring for the public contract and one targeted inline comment only where it prevents a future maintainer from changing intentional behavior.
+
+## Formatting During Documentation Passes
+
+Preserve behavior. Do not refactor logic unless the user asks.
+
+When returning revised code, it is acceptable to normalize obviously dense formatting around edited code so the result is reviewable. For example, split long argument lists or `return SomeObject(...)` calls across lines when the original formatting hurts readability. Do not rename symbols, reorder logic, change imports, or alter control flow unless requested.
+
 ## TODO Comments
 
 Make TODOs attributable and actionable:
@@ -174,12 +360,13 @@ Use this checklist when auditing code for shipping readiness:
 | Area | Standard |
 |---|---|
 | Module | Has a useful top-level docstring explaining file purpose. |
-| Public classes | Have class docstrings explaining responsibility and key attributes. |
-| Public functions/methods | Have docstrings when behavior, inputs, returns, exceptions, or side effects matter. |
+| Public classes | Have class docstrings explaining responsibility, ownership, delegation, and key attributes when useful. |
+| Public functions/methods | Have docstrings when behavior, inputs, returns, exceptions, side effects, or special branches matter. |
 | Private helpers | Skip comments/docstrings when names and type hints are enough. |
 | Inline comments | Explain intent, tradeoffs, workarounds, security, compatibility, or performance. |
 | Redundant comments | Remove comments that only paraphrase code. |
-| Accuracy | Do not document behavior, intent, or guarantees that the code does not support. |
+| Accuracy | Do not document behavior, intent, validation, guarantees, or side effects that the code does not support. |
+| Specificity | Replace vague filler with code-grounded contracts. |
 | TODOs | Include owner or tracking reference and a concrete action. |
 | Style | Use clear sentences, consistent punctuation, and no stale comments. |
 
@@ -191,9 +378,11 @@ After revising a file, include a short summary when it helps the user review the
 Documentation pass summary:
 - Added a module docstring describing the file responsibility.
 - Added docstrings for public APIs with useful Args/Returns/Raises sections.
+- Documented special behavior such as empty-input handling or skipped external calls.
 - Added inline comments only for non-obvious runtime or safety assumptions.
-- Avoided redundant comments for self-explanatory code.
+- Avoided or replaced vague claims such as validation, caching, or security when unsupported.
 - Flagged ambiguous intent instead of inventing behavior.
+- Preserved runtime behavior.
 ```
 
 Do not include a numeric score unless the user explicitly asks for one.
@@ -202,7 +391,13 @@ Do not include a numeric score unless the user explicitly asks for one.
 
 - Be practical and code-first.
 - Keep added comments minimal but useful.
+- Prefer precise, code-grounded docstrings over broad, generic, polished-sounding text.
 - Preserve the user's existing code behavior unless they ask for refactoring.
+- Edit provided code directly when the user asks to comment code.
+- Add `Args`, `Returns`, and `Raises` only when they improve the reader's understanding.
+- Document meaningful special branches and side effects.
+- Remove or avoid redundant comments that restate code.
+- When behavior or intent is ambiguous, use neutral wording or mention the ambiguity in the summary.
 - When the user asks for Google practice, say the guidance is inspired by Google's public Python style guide rather than claiming access to internal Google practices.
 - Do not invent intent or guarantees not supported by the code or user context.
 - Do not add citations unless web browsing was used in the current response.

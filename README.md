@@ -143,14 +143,16 @@ Explains technical concepts grounded in the actual repository under analysis —
 
 ### `python-comment-helper`
 
-Performs a shipping-quality documentation pass on Python code. Adds Google-style docstrings at module, class, and function level where they matter. Adds inline comments only for non-obvious intent, tradeoffs, workarounds, or safety constraints. Removes noise and never invents behavior or guarantees not supported by the code.
+Performs a shipping-quality documentation pass on Python code. Defaults to a tight one-liner docstring; adds `Args`, `Returns`, and `Raises` sections only when the summary line cannot carry the contract. Names the mechanism in the summary line, not just the outcome. Chooses verbs that reflect the nature of the operation. Removes noise and never invents behavior or guarantees not supported by the code.
 
 **Covers:**
-- Module docstrings explaining file responsibility and scope
-- Class docstrings with `Attributes` section for public and non-obvious internal classes
-- Function and method docstrings with `Args`, `Returns`, and `Raises` sections when they add value
+- Module docstrings — always multi-line: summary + elaboration body + closing `"""` on its own line; proportional to file complexity
+- Class docstrings with `Attributes` for public and non-obvious internal classes; `__init__` on data-structure classes documents fields created, not dependencies
+- One-liner first — single summary sentence by default; sections only when the one-liner genuinely cannot carry the contract
+- Mechanism naming — summary line names the algorithm or scoring method, not just the outcome ("Ranks EDUs by token overlap", not "Ranks EDUs")
+- Verb precision — Infers, Rebuilds, Creates, Returns chosen to reflect the nature of the operation, not just its output
 - Skip heuristic — omits docstrings for tiny private helpers when name and type hints are self-explanatory
-- Inline comments explaining the _why_: intent, tradeoffs, workarounds, security assumptions, compatibility constraints, performance choices
+- Inline comments explaining the _why_: intent, tradeoffs, workarounds, safety constraints, performance choices
 - Anti-invention discipline — never documents behavior, guarantees, or business intent not supported by the code
 - Documentation pass summary after revising a file
 

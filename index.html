@@ -1569,7 +1569,7 @@ results = retriever.<span class="fn">retrieve</span>(<span class="str">"what is 
 function buildPyCommentResponse() {
   return `<div class="rt">
     <div class="skill-active-badge">📝 python-comment-helper active</div>
-    <p>Documentation pass complete. Added a module docstring, class docstring with attributes, and method docstrings where behavior, contracts, or side effects matter. Skipped <span class="ic">_should_retry</span> — it's a one-liner whose name and set literal are self-explanatory. Inline comments added only where the logic is non-obvious.</p>
+    <p>Documentation pass complete. Module docstring is multi-line with an elaboration body naming the mechanism and thread-safety constraint. One-liner used for <span class="ic">post</span> — same retry contract as <span class="ic">get</span>, parameter names are self-explanatory. Full sections only for <span class="ic">_calc_delay</span> and <span class="ic">get</span> where the mechanism or special behavior is genuinely non-obvious. Skipped <span class="ic">_should_retry</span> — name and set literal are self-explanatory.</p>
 
     <h3>📄 Module + class docstring</h3>
     <pre><code><span class="cm">"""HTTP client with exponential-backoff retry logic.
@@ -1652,11 +1652,18 @@ thread or wrap access with external locking.
             <span class="kw">raise</span> last_exc
         <span class="kw">return</span> resp</code></pre>
 
+    <h3>📌 post — one-liner for a multi-param public method</h3>
+    <pre><code>    <span class="kw">def</span> <span class="fn">post</span>(self, path: <span class="fn">str</span>, json=<span class="kw">None</span>, headers=<span class="kw">None</span>) -> requests.Response:
+        <span class="cm">"""Sends a POST request applying the same retry logic as get."""</span>
+        url = self.base_url.<span class="fn">rstrip</span>(<span class="str">'/'</span>) + <span class="str">'/'</span> + path.<span class="fn">lstrip</span>(<span class="str">'/'</span>)
+        ...</code></pre>
+
     <h3>✅ Documentation pass summary</h3>
     <div class="steps">
-      <div class="step"><div class="step-n">✓</div><div>Added module docstring: responsibility, scope, and thread-safety constraint (evident from shared <span class="ic">self._session</span>); no invented deployment or production guarantees.</div></div>
+      <div class="step"><div class="step-n">✓</div><div>Module docstring is multi-line: summary line names the mechanism ("exponential-backoff retry logic"), elaboration body covers scope and thread-safety constraint — no invented deployment or production guarantees.</div></div>
       <div class="step"><div class="step-n">✓</div><div>Added class docstring with all five public attributes; documented <span class="ic">jitter</span> range precisely as <span class="ic">uniform(0.5, 1.5)</span> — matching the code — not as a vague "random factor."</div></div>
-      <div class="step"><div class="step-n">✓</div><div>Documented <span class="ic">_calc_delay</span>: non-obvious because exponential backoff with multiplicative jitter has a specific thundering-herd purpose not apparent from the arithmetic alone.</div></div>
+      <div class="step"><div class="step-n">✓</div><div>One-liner for <span class="ic">post</span>: three parameters, but names and type hints are self-explanatory and the retry contract is fully captured in the summary — sections would add no value.</div></div>
+      <div class="step"><div class="step-n">✓</div><div>Full sections for <span class="ic">_calc_delay</span>: the thundering-herd purpose of multiplicative jitter is not apparent from the arithmetic alone — mechanism named, jitter effect explained.</div></div>
       <div class="step"><div class="step-n">—</div><div>Skipped <span class="ic">_should_retry</span>: one line, self-explanatory name, the set literal <span class="ic">{429, 500, 502, 503, 504}</span> is the documentation. A docstring would only restate the code.</div></div>
       <div class="step"><div class="step-n">✓</div><div>Documented <span class="ic">get</span> with Args, Returns, and Raises; retry status codes listed are exactly those checked by <span class="ic">_should_retry</span> — no more, no invented contracts.</div></div>
       <div class="step"><div class="step-n">✓</div><div>Inline comments explain <em>why</em> jitter is randomised and why the last exception is raised instead of returning — not what the next line does.</div></div>
@@ -1686,9 +1693,11 @@ function buildPyCommentPanel() {
     <div class="panel-section">
       <h4>Documentation standard</h4>
       <div class="invoke-box" style="line-height:1.9">
-        Module: responsibility + scope<br>
-        Class: what it represents + attributes<br>
-        Function: behavior · Args · Returns · Raises<br>
+        Module: multi-line · summary + elaboration body<br>
+        Class: what it represents + attributes + delegation<br>
+        Function: one-liner first · sections only when needed<br>
+        Mechanism: name the algorithm, not just the outcome<br>
+        Verb: Infers · Rebuilds · Creates · Returns<br>
         Skip: tiny helpers where name explains all<br>
         Inline: intent · tradeoffs · workarounds · safety<br>
         Never: restate code · invent guarantees
